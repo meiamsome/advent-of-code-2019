@@ -28,7 +28,6 @@ fn get_planet_ancestors(input: &str) -> HashMap<&str, Vec<&str>> {
         .collect()
 }
 
-// FEELSBAD.JPG - Won't work in some cases I suspect (When Santa is directly on the ancestor tree of You)
 fn get_shortest_path<'a>(ancestors: HashMap<&'a str, Vec<&'a str>>, from: &str, to: &str) -> usize {
     let mut from_list: HashSet<&str> = HashSet::new();
     from_list.extend(ancestors.get(from).expect("From not in map").into_iter());
