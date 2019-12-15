@@ -204,6 +204,25 @@ mod test {
       assert_eq!(last_memory, vec!(1002, 4, 3, 4, 99));
     }
 
+    // regression
+    #[test]
+    fn test_regression_day5_part1() {
+      let mut vm = load_from_file("../day-5/part-1/input.txt").unwrap();
+      vm.io.input = Some(Box::new(vec!(1).into_iter()));
+      let mut count = 0;
+      let mut last_value = 0;
+      vm.io.output = Some(Box::new(|value| {
+        count += 1;
+        if last_value != 0 {
+          panic!("Unexpected non-zero op code test");
+        }
+        last_value = value;
+      }));
+      vm.last().unwrap();
+      assert_eq!(count, 10);
+      assert_eq!(last_value, 16434972);
+    }
+
     // Day 5 part 2
     #[test]
     fn test_position_mode_1_lessthan() {
@@ -248,5 +267,261 @@ mod test {
       vm.last().unwrap();
       assert_eq!(count, 1);
       assert_eq!(last_value, 0);
+    }
+
+    #[test]
+    fn test_position_mode_2_lessthan() {
+      let mut vm = load_from_str("3,9,7,9,10,9,4,9,99,-1,8").unwrap();
+      vm.io.input = Some(Box::new(vec!(1).into_iter()));
+      let mut count = 0;
+      let mut last_value = 0;
+      vm.io.output = Some(Box::new(|value| {
+        count += 1;
+        last_value = value;
+      }));
+      vm.last().unwrap();
+      assert_eq!(count, 1);
+      assert_eq!(last_value, 1);
+    }
+
+    #[test]
+    fn test_position_mode_2_equal() {
+      let mut vm = load_from_str("3,9,7,9,10,9,4,9,99,-1,8").unwrap();
+      vm.io.input = Some(Box::new(vec!(8).into_iter()));
+      let mut count = 0;
+      let mut last_value = 0;
+      vm.io.output = Some(Box::new(|value| {
+        count += 1;
+        last_value = value;
+      }));
+      vm.last().unwrap();
+      assert_eq!(count, 1);
+      assert_eq!(last_value, 0);
+    }
+
+    #[test]
+    fn test_position_mode_2_greater_than() {
+      let mut vm = load_from_str("3,9,7,9,10,9,4,9,99,-1,8").unwrap();
+      vm.io.input = Some(Box::new(vec!(10).into_iter()));
+      let mut count = 0;
+      let mut last_value = 0;
+      vm.io.output = Some(Box::new(|value| {
+        count += 1;
+        last_value = value;
+      }));
+      vm.last().unwrap();
+      assert_eq!(count, 1);
+      assert_eq!(last_value, 0);
+    }
+
+    #[test]
+    fn test_immediate_mode_1_lessthan() {
+      let mut vm = load_from_str("3,3,1108,-1,8,3,4,3,99").unwrap();
+      vm.io.input = Some(Box::new(vec!(1).into_iter()));
+      let mut count = 0;
+      let mut last_value = 0;
+      vm.io.output = Some(Box::new(|value| {
+        count += 1;
+        last_value = value;
+      }));
+      vm.last().unwrap();
+      assert_eq!(count, 1);
+      assert_eq!(last_value, 0);
+    }
+
+    #[test]
+    fn test_immediate_mode_1_equal() {
+      let mut vm = load_from_str("3,3,1108,-1,8,3,4,3,99").unwrap();
+      vm.io.input = Some(Box::new(vec!(8).into_iter()));
+      let mut count = 0;
+      let mut last_value = 0;
+      vm.io.output = Some(Box::new(|value| {
+        count += 1;
+        last_value = value;
+      }));
+      vm.last().unwrap();
+      assert_eq!(count, 1);
+      assert_eq!(last_value, 1);
+    }
+
+    #[test]
+    fn test_immediate_mode_1_greater_than() {
+      let mut vm = load_from_str("3,3,1108,-1,8,3,4,3,99").unwrap();
+      vm.io.input = Some(Box::new(vec!(10).into_iter()));
+      let mut count = 0;
+      let mut last_value = 0;
+      vm.io.output = Some(Box::new(|value| {
+        count += 1;
+        last_value = value;
+      }));
+      vm.last().unwrap();
+      assert_eq!(count, 1);
+      assert_eq!(last_value, 0);
+    }
+
+    #[test]
+    fn test_immediate_mode_2_lessthan() {
+      let mut vm = load_from_str("3,3,1107,-1,8,3,4,3,99").unwrap();
+      vm.io.input = Some(Box::new(vec!(1).into_iter()));
+      let mut count = 0;
+      let mut last_value = 0;
+      vm.io.output = Some(Box::new(|value| {
+        count += 1;
+        last_value = value;
+      }));
+      vm.last().unwrap();
+      assert_eq!(count, 1);
+      assert_eq!(last_value, 1);
+    }
+
+    #[test]
+    fn test_immediate_mode_2_equal() {
+      let mut vm = load_from_str("3,3,1107,-1,8,3,4,3,99").unwrap();
+      vm.io.input = Some(Box::new(vec!(8).into_iter()));
+      let mut count = 0;
+      let mut last_value = 0;
+      vm.io.output = Some(Box::new(|value| {
+        count += 1;
+        last_value = value;
+      }));
+      vm.last().unwrap();
+      assert_eq!(count, 1);
+      assert_eq!(last_value, 0);
+    }
+
+    #[test]
+    fn test_immediate_mode_2_greater_than() {
+      let mut vm = load_from_str("3,3,1107,-1,8,3,4,3,99").unwrap();
+      vm.io.input = Some(Box::new(vec!(10).into_iter()));
+      let mut count = 0;
+      let mut last_value = 0;
+      vm.io.output = Some(Box::new(|value| {
+        count += 1;
+        last_value = value;
+      }));
+      vm.last().unwrap();
+      assert_eq!(count, 1);
+      assert_eq!(last_value, 0);
+    }
+
+    #[test]
+    fn test_position_mode_jump_zero() {
+      let mut vm = load_from_str("3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9").unwrap();
+      vm.io.input = Some(Box::new(vec!(0).into_iter()));
+      let mut count = 0;
+      let mut last_value = 0;
+      vm.io.output = Some(Box::new(|value| {
+        count += 1;
+        last_value = value;
+      }));
+      vm.last().unwrap();
+      assert_eq!(count, 1);
+      assert_eq!(last_value, 0);
+    }
+
+    #[test]
+    fn test_position_mode_jump_non_zero() {
+      let mut vm = load_from_str("3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9").unwrap();
+      vm.io.input = Some(Box::new(vec!(10).into_iter()));
+      let mut count = 0;
+      let mut last_value = 0;
+      vm.io.output = Some(Box::new(|value| {
+        count += 1;
+        last_value = value;
+      }));
+      vm.last().unwrap();
+      assert_eq!(count, 1);
+      assert_eq!(last_value, 1);
+    }
+
+    #[test]
+    fn test_immediate_mode_jump_zero() {
+      let mut vm = load_from_str("3,3,1105,-1,9,1101,0,0,12,4,12,99,1").unwrap();
+      vm.io.input = Some(Box::new(vec!(0).into_iter()));
+      let mut count = 0;
+      let mut last_value = 0;
+      vm.io.output = Some(Box::new(|value| {
+        count += 1;
+        last_value = value;
+      }));
+      vm.last().unwrap();
+      assert_eq!(count, 1);
+      assert_eq!(last_value, 0);
+    }
+
+    #[test]
+    fn test_immediate_mode_jump_non_zero() {
+      let mut vm = load_from_str("3,3,1105,-1,9,1101,0,0,12,4,12,99,1").unwrap();
+      vm.io.input = Some(Box::new(vec!(10).into_iter()));
+      let mut count = 0;
+      let mut last_value = 0;
+      vm.io.output = Some(Box::new(|value| {
+        count += 1;
+        last_value = value;
+      }));
+      vm.last().unwrap();
+      assert_eq!(count, 1);
+      assert_eq!(last_value, 1);
+    }
+
+    #[test]
+    fn test_8_compare_less_than() {
+      let mut vm = load_from_str("3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99").unwrap();
+      vm.io.input = Some(Box::new(vec!(5).into_iter()));
+      let mut count = 0;
+      let mut last_value = 0;
+      vm.io.output = Some(Box::new(|value| {
+        count += 1;
+        last_value = value;
+      }));
+      vm.last().unwrap();
+      assert_eq!(count, 1);
+      assert_eq!(last_value, 999);
+    }
+
+    #[test]
+    fn test_8_compare_equal() {
+      let mut vm = load_from_str("3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99").unwrap();
+      vm.io.input = Some(Box::new(vec!(8).into_iter()));
+      let mut count = 0;
+      let mut last_value = 0;
+      vm.io.output = Some(Box::new(|value| {
+        count += 1;
+        last_value = value;
+      }));
+      vm.last().unwrap();
+      assert_eq!(count, 1);
+      assert_eq!(last_value, 1000);
+    }
+
+    #[test]
+    fn test_8_compare_greater_than() {
+      let mut vm = load_from_str("3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99").unwrap();
+      vm.io.input = Some(Box::new(vec!(10).into_iter()));
+      let mut count = 0;
+      let mut last_value = 0;
+      vm.io.output = Some(Box::new(|value| {
+        count += 1;
+        last_value = value;
+      }));
+      vm.last().unwrap();
+      assert_eq!(count, 1);
+      assert_eq!(last_value, 1001);
+    }
+
+    // regression
+    #[test]
+    fn test_regression_day5_part2() {
+      let mut vm = load_from_file("../day-5/part-1/input.txt").unwrap();
+      vm.io.input = Some(Box::new(vec!(5).into_iter()));
+      let mut count = 0;
+      let mut last_value = 0;
+      vm.io.output = Some(Box::new(|value| {
+        count += 1;
+        last_value = value;
+      }));
+      vm.last().unwrap();
+      assert_eq!(count, 1);
+      assert_eq!(last_value, 16694270);
     }
 }
