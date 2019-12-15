@@ -1,21 +1,20 @@
 use std::fs::File;
-use std::io::stdin;
 use std::io::prelude::*;
 
 use std::collections::HashMap;
 use std::convert::TryFrom;
 
-use super::{IntcodeVM, OpCode};
+use super::{IntcodeVM, IntcodeVMMemory, IntcodeVMIO, OpCode};
 
-fn get_parameter_addresses_with_modes(instruction_pointer: usize, memory: &mut Vec<i32>, count: usize) -> Vec<usize> {
-  let mut op_code = memory[instruction_pointer] / 100;
+fn get_parameter_addresses_with_modes(memory: &mut IntcodeVMMemory<i32>, count: usize) -> Vec<usize> {
+  let mut op_code = memory[memory.instruction_pointer] / 100;
   (0..count)
     .map(|offset| {
       let mode = op_code % 10;
       op_code /= 10;
       match mode {
-        0 => usize::try_from(memory[instruction_pointer + offset + 1]).unwrap(),
-        1 => instruction_pointer + offset + 1,
+        0 => usize::try_from(memory[memory.instruction_pointer + offset + 1]).unwrap(),
+        1 => memory.instruction_pointer + offset + 1,
         _ => panic!("Unknown mode {}", mode),
       }
     })
@@ -24,54 +23,94 @@ fn get_parameter_addresses_with_modes(instruction_pointer: usize, memory: &mut V
 
 struct Halt;
 impl OpCode<i32> for Halt {
-    fn execute(&self, _instruction_pointer: usize, _memory: &mut Vec<i32>) -> Option<usize> {
+    fn execute(&self, _memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<usize> {
         None
     }
 }
 
 struct Add;
 impl OpCode<i32> for Add {
-    fn execute(&self, instruction_pointer: usize, memory: &mut Vec<i32>) -> Option<usize> {
-        let addresses = get_parameter_addresses_with_modes(instruction_pointer, memory, 3);
+    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<usize> {
+        let addresses = get_parameter_addresses_with_modes(memory, 3);
         let a = memory[addresses[0]];
         let b = memory[addresses[1]];
         memory[addresses[2]] = a + b;
-        Some(4)
+        Some(memory.instruction_pointer + 4)
     }
 }
 
 struct Mul;
 impl OpCode<i32> for Mul {
-    fn execute(&self, instruction_pointer: usize, memory: &mut Vec<i32>) -> Option<usize> {
-        let addresses = get_parameter_addresses_with_modes(instruction_pointer, memory, 3);
+    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<usize> {
+        let addresses = get_parameter_addresses_with_modes(memory, 3);
         let a = memory[addresses[0]];
         let b = memory[addresses[1]];
         memory[addresses[2]] = a * b;
-        Some(4)
+        Some(memory.instruction_pointer + 4)
     }
 }
 
 struct Input;
 impl OpCode<i32> for Input {
-    fn execute(&self, instruction_pointer: usize, memory: &mut Vec<i32>) -> Option<usize> {
-        let addresses = get_parameter_addresses_with_modes(instruction_pointer, memory, 1);
-        let mut input_text = String::new();
-        stdin()
-            .read_line(&mut input_text)
-            .expect("failed to read from stdin");
-
-        let trimmed = input_text.trim();
-        memory[addresses[0]] = trimmed.parse::<i32>().unwrap();
-        Some(2)
+    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, io: &mut IntcodeVMIO<i32>) -> Option<usize> {
+        let addresses = get_parameter_addresses_with_modes(memory, 1);
+        memory[addresses[0]] =  io.input.as_mut().map(|input| input.next().unwrap()).expect("No IO input specified.");
+        Some(memory.instruction_pointer + 2)
     }
 }
 
 struct Output;
 impl OpCode<i32> for Output {
-    fn execute(&self, instruction_pointer: usize, memory: &mut Vec<i32>) -> Option<usize> {
-        let addresses = get_parameter_addresses_with_modes(instruction_pointer, memory, 1);
-        println!("Output: {}", memory[addresses[0]]);
-        Some(2)
+    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, io: &mut IntcodeVMIO<i32>) -> Option<usize> {
+        let addresses = get_parameter_addresses_with_modes(memory, 2);
+        io.output.as_mut().map(|x| x(memory[addresses[0]])).expect("No IO output specified");
+        Some(memory.instruction_pointer + 2)
+    }
+}
+
+struct JumpIfTrue;
+impl OpCode<i32> for JumpIfTrue {
+    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<usize> {
+        let addresses = get_parameter_addresses_with_modes(memory, 2);
+        if memory[addresses[0]] != 0 {
+          Some(usize::try_from(memory[addresses[1]]).unwrap())
+        } else {
+          Some(memory.instruction_pointer + 3)
+        }
+    }
+}
+
+struct JumpIfFalse;
+impl OpCode<i32> for JumpIfFalse {
+    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<usize> {
+        let addresses = get_parameter_addresses_with_modes(memory, 2);
+        if memory[addresses[0]] == 0 {
+          Some(usize::try_from(memory[addresses[1]]).unwrap())
+        } else {
+          Some(memory.instruction_pointer + 3)
+        }
+    }
+}
+
+struct LessThan;
+impl OpCode<i32> for LessThan {
+    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<usize> {
+        let addresses = get_parameter_addresses_with_modes(memory, 3);
+        let a = memory[addresses[0]];
+        let b = memory[addresses[1]];
+        memory[addresses[2]] = if a < b { 1 } else { 0 };
+        Some(memory.instruction_pointer + 4)
+    }
+}
+
+struct Equals;
+impl OpCode<i32> for Equals {
+    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<usize> {
+        let addresses = get_parameter_addresses_with_modes(memory, 3);
+        let a = memory[addresses[0]];
+        let b = memory[addresses[1]];
+        memory[addresses[2]] = if a == b { 1 } else { 0 };
+        Some(memory.instruction_pointer + 4)
     }
 }
 
@@ -81,6 +120,10 @@ pub fn get_ops() -> HashMap<i32, Box<dyn OpCode<i32>>> {
   ops.insert(2, Box::new(Mul));
   ops.insert(3, Box::new(Input));
   ops.insert(4, Box::new(Output));
+  ops.insert(5, Box::new(JumpIfTrue));
+  ops.insert(6, Box::new(JumpIfFalse));
+  ops.insert(7, Box::new(LessThan));
+  ops.insert(8, Box::new(Equals));
   ops.insert(99, Box::new(Halt));
   return ops
 }
@@ -109,7 +152,9 @@ pub fn load_from_str(program: &str) -> Result<IntcodeVM<i32>, Box<dyn std::error
   Ok(IntcodeVM::create(
       string_to_i32_list(program.trim())?,
       get_ops(),
-      &op_code_lookup
+      &op_code_lookup,
+      None,
+      None,
   ))
 }
 
@@ -117,7 +162,9 @@ pub fn load_from_file(filename: &str) -> Result<IntcodeVM<i32>, Box<dyn std::err
   Ok(IntcodeVM::create(
       load_memory_from_file(filename)?,
       get_ops(),
-      &op_code_lookup
+      &op_code_lookup,
+      None,
+      None,
   ))
 }
 
@@ -149,10 +196,57 @@ mod test {
       assert_eq!(last_memory[0], 19690720);
     }
 
+    // Day 5 part 1
     #[test]
     fn test_parameter_mode_1() {
       let vm = load_from_str("1002,4,3,4,33").unwrap();
       let last_memory = vm.last().unwrap();
       assert_eq!(last_memory, vec!(1002, 4, 3, 4, 99));
+    }
+
+    // Day 5 part 2
+    #[test]
+    fn test_position_mode_1_lessthan() {
+      let mut vm = load_from_str("3,9,8,9,10,9,4,9,99,-1,8").unwrap();
+      vm.io.input = Some(Box::new(vec!(1).into_iter()));
+      let mut count = 0;
+      let mut last_value = 0;
+      vm.io.output = Some(Box::new(|value| {
+        count += 1;
+        last_value = value;
+      }));
+      vm.last().unwrap();
+      assert_eq!(count, 1);
+      assert_eq!(last_value, 0);
+    }
+
+    #[test]
+    fn test_position_mode_1_equal() {
+      let mut vm = load_from_str("3,9,8,9,10,9,4,9,99,-1,8").unwrap();
+      vm.io.input = Some(Box::new(vec!(8).into_iter()));
+      let mut count = 0;
+      let mut last_value = 0;
+      vm.io.output = Some(Box::new(|value| {
+        count += 1;
+        last_value = value;
+      }));
+      vm.last().unwrap();
+      assert_eq!(count, 1);
+      assert_eq!(last_value, 1);
+    }
+
+    #[test]
+    fn test_position_mode_1_greater_than() {
+      let mut vm = load_from_str("3,9,8,9,10,9,4,9,99,-1,8").unwrap();
+      vm.io.input = Some(Box::new(vec!(10).into_iter()));
+      let mut count = 0;
+      let mut last_value = 0;
+      vm.io.output = Some(Box::new(|value| {
+        count += 1;
+        last_value = value;
+      }));
+      vm.last().unwrap();
+      assert_eq!(count, 1);
+      assert_eq!(last_value, 0);
     }
 }

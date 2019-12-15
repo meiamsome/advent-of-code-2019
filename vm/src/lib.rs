@@ -1,23 +1,49 @@
 #[macro_use] extern crate log;
 
+use core::ops::{Index, IndexMut};
 use std::collections::HashMap;
 use std::cmp::{Eq, PartialEq};
 use std::hash::Hash;
 use std::fmt::Debug;
 
+pub mod io;
 pub mod lang;
+
+pub struct IntcodeVMMemory<T> {
+    pub instruction_pointer: usize,
+    pub memory: Vec<T>,
+}
+
+impl<T> Index<usize> for IntcodeVMMemory<T> {
+    type Output = T;
+
+    fn index(&self, location: usize) -> &Self::Output {
+        &self.memory[location]
+    }
+}
+
+impl<T> IndexMut<usize> for IntcodeVMMemory<T> {
+    fn index_mut(&mut self, location: usize) -> &mut Self::Output {
+        &mut self.memory[location]
+    }
+}
+
+pub struct IntcodeVMIO<'a, T> {
+    pub input: Option<Box<dyn Iterator<Item=T> + 'a>>,
+    pub output: Option<Box<dyn FnMut(T) -> () + 'a>>,
+}
 
 pub trait OpCode<T>
 {
-    fn execute(&self, instruction_pointer: usize, memory: &mut Vec<T>) -> Option<usize>;
+    fn execute(&self, memory: &mut IntcodeVMMemory<T>, io: &mut IntcodeVMIO<T>) -> Option<usize>;
 }
 
 pub struct IntcodeVM<'a, T>
 {
-    pub instruction_pointer: usize,
-    pub memory: Vec<T>,
+    pub memory: IntcodeVMMemory<T>,
     pub op_codes: HashMap<T, Box<dyn OpCode<T>>>,
     pub op_code_map: &'a dyn Fn(T) -> T,
+    pub io: IntcodeVMIO<'a, T>,
 }
 
 
@@ -29,12 +55,20 @@ where
         memory: Vec<T>,
         op_codes: HashMap<T, Box<dyn OpCode<T>>>,
         op_code_map: &'a dyn Fn(T) -> T,
-    ) -> IntcodeVM<T> {
+        input: Option<Box<dyn Iterator<Item=T>>>,
+        output: Option<Box<dyn FnMut(T) -> ()>>,
+    ) -> IntcodeVM<'a, T> {
         IntcodeVM {
-            instruction_pointer: 0,
-            memory: memory,
+            memory: IntcodeVMMemory {
+                instruction_pointer: 0,
+                memory: memory,
+            },
             op_codes: op_codes,
             op_code_map: op_code_map,
+            io: IntcodeVMIO {
+                input: input,
+                output: output,
+            },
         }
     }
 }
@@ -46,17 +80,17 @@ where
     type Item = Vec<T>;
 
     fn next(&mut self) -> Option<Vec<T>> {
-        let op_code = (self.op_code_map)(self.memory[self.instruction_pointer]);
+        let op_code = (self.op_code_map)(self.memory.memory[self.memory.instruction_pointer]);
         let op = self.op_codes.get(&op_code);
         if op.is_none() {
             panic!("Unknown OpCode! {:?}", op_code);
         }
 
-        match op.unwrap().execute(self.instruction_pointer, &mut self.memory) {
+        match op.unwrap().execute(&mut self.memory, &mut self.io) {
             Some(x) => {
-                debug!("Processed op code: {:?}", &self.memory[self.instruction_pointer..(self.instruction_pointer + x)]);
-                self.instruction_pointer += x;
-                Some(self.memory.clone())
+                debug!("Processed op code: {:?}", self.memory.memory[self.memory.instruction_pointer]);
+                self.memory.instruction_pointer = x;
+                Some(self.memory.memory.clone())
             },
             None => None
         }
