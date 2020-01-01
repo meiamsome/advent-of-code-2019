@@ -3,7 +3,7 @@ use std::io::stdin;
 use std::str::FromStr;
 use std::marker::PhantomData;
 
-use super::{IntcodeVMIO};
+use super::IntcodeVMIO;
 
 struct IntcodeVMInput<T> {
   phantom: PhantomData<T>

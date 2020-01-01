@@ -5,16 +5,21 @@ use std::collections::HashSet;
 use vm::lang::load_from_str;
 
 fn run_with_phases(program: &str, phases: Vec<i32>) -> Result<i32, Box<dyn std::error::Error>>  {
-    let mut current = 0;
-    for phase in phases {
-        let mut vm = load_from_str(program)?;
-        vm.io.input = Some(Box::new(vec!(phase, current).into_iter()));
-        vm.io.output = Some(Box::new(|output| {
-            current = output;
-        }));
-        vm.last().unwrap();
-    }
-    Ok(current)
+    Ok(
+        phases.into_iter()
+            .fold::<Result<Box<dyn Iterator<Item=i32>>, Box<dyn std::error::Error>>, _>(
+                Ok(Box::new(vec!(0).into_iter())),
+                |iterator, phase| {
+                    iterator.and_then::<Box<dyn Iterator<Item=i32>>, _>(|iter| {
+                        let mut vm = load_from_str(program)?;
+                        vm.io.input = Some(Box::new(vec!(phase).into_iter().chain(iter)));
+                        Ok(Box::new(vm))
+                    })
+                }
+            )?
+            .last()
+            .unwrap()
+    )
 }
 
 fn get_optimal_phase(program: &str) -> Result<(i32, (i32, i32, i32, i32, i32)), Box<dyn std::error::Error>> {

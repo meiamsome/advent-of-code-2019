@@ -35,7 +35,7 @@ pub struct IntcodeVMIO<'a, T> {
 
 pub trait OpCode<T>
 {
-    fn execute(&self, memory: &mut IntcodeVMMemory<T>, io: &mut IntcodeVMIO<T>) -> Option<usize>;
+    fn execute(&self, memory: &mut IntcodeVMMemory<T>, io: &mut IntcodeVMIO<T>) -> Option<(usize, Option<T>)>;
 }
 
 pub struct IntcodeVM<'a, T>
@@ -77,22 +77,28 @@ impl<T> Iterator for IntcodeVM<'_, T>
 where
     T: Copy + Hash + Eq + PartialEq + Debug
 {
-    type Item = Vec<T>;
+    type Item = T;
 
-    fn next(&mut self) -> Option<Vec<T>> {
-        let op_code = (self.op_code_map)(self.memory.memory[self.memory.instruction_pointer]);
-        let op = self.op_codes.get(&op_code);
-        if op.is_none() {
-            panic!("Unknown OpCode! {:?}", op_code);
-        }
+    fn next(&mut self) -> Option<T> {
+        loop {
+            let op_code = (self.op_code_map)(self.memory.memory[self.memory.instruction_pointer]);
+            let op = self.op_codes.get(&op_code);
+            if op.is_none() {
+                panic!("Unknown OpCode! {:?}", op_code);
+            }
 
-        match op.unwrap().execute(&mut self.memory, &mut self.io) {
-            Some(x) => {
-                debug!("Processed op code: {:?}", self.memory.memory[self.memory.instruction_pointer]);
-                self.memory.instruction_pointer = x;
-                Some(self.memory.memory.clone())
-            },
-            None => None
+            match op.unwrap().execute(&mut self.memory, &mut self.io) {
+                Some((new_instruction_pointer, ret_val_option)) => {
+                    debug!("Processed op code: {:?}", self.memory.memory[self.memory.instruction_pointer]);
+                    self.memory.instruction_pointer = new_instruction_pointer;
+                    if let Some(ret_val) = ret_val_option {
+                        return Some(ret_val);
+                    }
+                },
+                None => {
+                    return None
+                }
+            }
         }
     }
 }

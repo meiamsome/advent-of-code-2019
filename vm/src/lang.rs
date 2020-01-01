@@ -23,94 +23,94 @@ fn get_parameter_addresses_with_modes(memory: &mut IntcodeVMMemory<i32>, count: 
 
 struct Halt;
 impl OpCode<i32> for Halt {
-    fn execute(&self, _memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<usize> {
+    fn execute(&self, _memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<(usize, Option<i32>)> {
         None
     }
 }
 
 struct Add;
 impl OpCode<i32> for Add {
-    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<usize> {
+    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<(usize, Option<i32>)> {
         let addresses = get_parameter_addresses_with_modes(memory, 3);
         let a = memory[addresses[0]];
         let b = memory[addresses[1]];
         memory[addresses[2]] = a + b;
-        Some(memory.instruction_pointer + 4)
+        Some((memory.instruction_pointer + 4, None))
     }
 }
 
 struct Mul;
 impl OpCode<i32> for Mul {
-    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<usize> {
+    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<(usize, Option<i32>)> {
         let addresses = get_parameter_addresses_with_modes(memory, 3);
         let a = memory[addresses[0]];
         let b = memory[addresses[1]];
         memory[addresses[2]] = a * b;
-        Some(memory.instruction_pointer + 4)
+        Some((memory.instruction_pointer + 4, None))
     }
 }
 
 struct Input;
 impl OpCode<i32> for Input {
-    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, io: &mut IntcodeVMIO<i32>) -> Option<usize> {
+    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, io: &mut IntcodeVMIO<i32>) -> Option<(usize, Option<i32>)> {
         let addresses = get_parameter_addresses_with_modes(memory, 1);
         memory[addresses[0]] =  io.input.as_mut().map(|input| input.next().unwrap()).expect("No IO input specified.");
-        Some(memory.instruction_pointer + 2)
+        Some((memory.instruction_pointer + 2, None))
     }
 }
 
 struct Output;
 impl OpCode<i32> for Output {
-    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, io: &mut IntcodeVMIO<i32>) -> Option<usize> {
+    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, io: &mut IntcodeVMIO<i32>) -> Option<(usize, Option<i32>)> {
         let addresses = get_parameter_addresses_with_modes(memory, 2);
-        io.output.as_mut().map(|x| x(memory[addresses[0]])).expect("No IO output specified");
-        Some(memory.instruction_pointer + 2)
+        io.output.as_mut().map(|x| x(memory[addresses[0]]));
+        Some((memory.instruction_pointer + 2, Some(memory[addresses[0]])))
     }
 }
 
 struct JumpIfTrue;
 impl OpCode<i32> for JumpIfTrue {
-    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<usize> {
+    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<(usize, Option<i32>)> {
         let addresses = get_parameter_addresses_with_modes(memory, 2);
         if memory[addresses[0]] != 0 {
-          Some(usize::try_from(memory[addresses[1]]).unwrap())
+          Some((usize::try_from(memory[addresses[1]]).unwrap(), None))
         } else {
-          Some(memory.instruction_pointer + 3)
+          Some((memory.instruction_pointer + 3, None))
         }
     }
 }
 
 struct JumpIfFalse;
 impl OpCode<i32> for JumpIfFalse {
-    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<usize> {
+    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<(usize, Option<i32>)> {
         let addresses = get_parameter_addresses_with_modes(memory, 2);
         if memory[addresses[0]] == 0 {
-          Some(usize::try_from(memory[addresses[1]]).unwrap())
+          Some((usize::try_from(memory[addresses[1]]).unwrap(), None))
         } else {
-          Some(memory.instruction_pointer + 3)
+          Some((memory.instruction_pointer + 3, None))
         }
     }
 }
 
 struct LessThan;
 impl OpCode<i32> for LessThan {
-    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<usize> {
+    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<(usize, Option<i32>)> {
         let addresses = get_parameter_addresses_with_modes(memory, 3);
         let a = memory[addresses[0]];
         let b = memory[addresses[1]];
         memory[addresses[2]] = if a < b { 1 } else { 0 };
-        Some(memory.instruction_pointer + 4)
+        Some((memory.instruction_pointer + 4, None))
     }
 }
 
 struct Equals;
 impl OpCode<i32> for Equals {
-    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<usize> {
+    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<(usize, Option<i32>)> {
         let addresses = get_parameter_addresses_with_modes(memory, 3);
         let a = memory[addresses[0]];
         let b = memory[addresses[1]];
         memory[addresses[2]] = if a == b { 1 } else { 0 };
-        Some(memory.instruction_pointer + 4)
+        Some((memory.instruction_pointer + 4, None))
     }
 }
 
@@ -144,7 +144,7 @@ pub fn load_memory_from_file(filename: &str) -> Result<Vec<i32>, Box<dyn std::er
   Ok(string_to_i32_list(contents.trim())?)
 }
 
-fn op_code_lookup(input: i32) -> i32 {
+pub fn op_code_lookup(input: i32) -> i32 {
   input % 100
 }
 

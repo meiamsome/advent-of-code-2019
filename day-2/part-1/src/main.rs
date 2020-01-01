@@ -1,8 +1,8 @@
 use vm::lang::load_from_file;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let vm = load_from_file("./input.txt")?;
-    let last_memory = vm.last().unwrap();
-    println!("{:?}", last_memory);
+    let mut vm = load_from_file("./input.txt")?;
+    while let Some(_) = vm.next() {};
+    println!("{:?}", vm.memory.memory);
     Ok(())
 }
