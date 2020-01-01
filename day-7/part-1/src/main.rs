@@ -4,13 +4,13 @@ use std::collections::HashSet;
 
 use vm::lang::load_from_str;
 
-fn run_with_phases(program: &str, phases: Vec<i32>) -> Result<i32, Box<dyn std::error::Error>>  {
+fn run_with_phases(program: &str, phases: Vec<i64>) -> Result<i64, Box<dyn std::error::Error>>  {
     Ok(
         phases.into_iter()
-            .fold::<Result<Box<dyn Iterator<Item=i32>>, Box<dyn std::error::Error>>, _>(
+            .fold::<Result<Box<dyn Iterator<Item=i64>>, Box<dyn std::error::Error>>, _>(
                 Ok(Box::new(vec!(0).into_iter())),
                 |iterator, phase| {
-                    iterator.and_then::<Box<dyn Iterator<Item=i32>>, _>(|iter| {
+                    iterator.and_then::<Box<dyn Iterator<Item=i64>>, _>(|iter| {
                         let mut vm = load_from_str(program)?;
                         vm.io.input = Some(Box::new(vec!(phase).into_iter().chain(iter)));
                         Ok(Box::new(vm))
@@ -22,7 +22,7 @@ fn run_with_phases(program: &str, phases: Vec<i32>) -> Result<i32, Box<dyn std::
     )
 }
 
-fn get_optimal_phase(program: &str) -> Result<(i32, (i32, i32, i32, i32, i32)), Box<dyn std::error::Error>> {
+fn get_optimal_phase(program: &str) -> Result<(i64, (i64, i64, i64, i64, i64)), Box<dyn std::error::Error>> {
     let mut max = 0;
     let mut arg_max = (0, 0, 0, 0, 0);
     for a in 0..=4 {

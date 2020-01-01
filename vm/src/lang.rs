@@ -6,7 +6,7 @@ use std::convert::TryFrom;
 
 use super::{IntcodeVM, IntcodeVMMemory, IntcodeVMIO, OpCode};
 
-fn get_parameter_addresses_with_modes(memory: &mut IntcodeVMMemory<i32>, count: usize) -> Vec<usize> {
+fn get_parameter_addresses_with_modes(memory: &mut IntcodeVMMemory<i64>, count: usize) -> Vec<usize> {
   let mut op_code = memory[memory.instruction_pointer] / 100;
   (0..count)
     .map(|offset| {
@@ -22,15 +22,15 @@ fn get_parameter_addresses_with_modes(memory: &mut IntcodeVMMemory<i32>, count: 
 }
 
 struct Halt;
-impl OpCode<i32> for Halt {
-    fn execute(&self, _memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<(usize, Option<i32>)> {
+impl OpCode<i64> for Halt {
+    fn execute(&self, _memory: &mut IntcodeVMMemory<i64>, _io: &mut IntcodeVMIO<i64>) -> Option<(usize, Option<i64>)> {
         None
     }
 }
 
 struct Add;
-impl OpCode<i32> for Add {
-    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<(usize, Option<i32>)> {
+impl OpCode<i64> for Add {
+    fn execute(&self, memory: &mut IntcodeVMMemory<i64>, _io: &mut IntcodeVMIO<i64>) -> Option<(usize, Option<i64>)> {
         let addresses = get_parameter_addresses_with_modes(memory, 3);
         let a = memory[addresses[0]];
         let b = memory[addresses[1]];
@@ -40,8 +40,8 @@ impl OpCode<i32> for Add {
 }
 
 struct Mul;
-impl OpCode<i32> for Mul {
-    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<(usize, Option<i32>)> {
+impl OpCode<i64> for Mul {
+    fn execute(&self, memory: &mut IntcodeVMMemory<i64>, _io: &mut IntcodeVMIO<i64>) -> Option<(usize, Option<i64>)> {
         let addresses = get_parameter_addresses_with_modes(memory, 3);
         let a = memory[addresses[0]];
         let b = memory[addresses[1]];
@@ -51,8 +51,8 @@ impl OpCode<i32> for Mul {
 }
 
 struct Input;
-impl OpCode<i32> for Input {
-    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, io: &mut IntcodeVMIO<i32>) -> Option<(usize, Option<i32>)> {
+impl OpCode<i64> for Input {
+    fn execute(&self, memory: &mut IntcodeVMMemory<i64>, io: &mut IntcodeVMIO<i64>) -> Option<(usize, Option<i64>)> {
         let addresses = get_parameter_addresses_with_modes(memory, 1);
         memory[addresses[0]] =  io.input.as_mut().map(|input| input.next().unwrap()).expect("No IO input specified.");
         Some((memory.instruction_pointer + 2, None))
@@ -60,8 +60,8 @@ impl OpCode<i32> for Input {
 }
 
 struct Output;
-impl OpCode<i32> for Output {
-    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, io: &mut IntcodeVMIO<i32>) -> Option<(usize, Option<i32>)> {
+impl OpCode<i64> for Output {
+    fn execute(&self, memory: &mut IntcodeVMMemory<i64>, io: &mut IntcodeVMIO<i64>) -> Option<(usize, Option<i64>)> {
         let addresses = get_parameter_addresses_with_modes(memory, 2);
         io.output.as_mut().map(|x| x(memory[addresses[0]]));
         Some((memory.instruction_pointer + 2, Some(memory[addresses[0]])))
@@ -69,8 +69,8 @@ impl OpCode<i32> for Output {
 }
 
 struct JumpIfTrue;
-impl OpCode<i32> for JumpIfTrue {
-    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<(usize, Option<i32>)> {
+impl OpCode<i64> for JumpIfTrue {
+    fn execute(&self, memory: &mut IntcodeVMMemory<i64>, _io: &mut IntcodeVMIO<i64>) -> Option<(usize, Option<i64>)> {
         let addresses = get_parameter_addresses_with_modes(memory, 2);
         if memory[addresses[0]] != 0 {
           Some((usize::try_from(memory[addresses[1]]).unwrap(), None))
@@ -81,8 +81,8 @@ impl OpCode<i32> for JumpIfTrue {
 }
 
 struct JumpIfFalse;
-impl OpCode<i32> for JumpIfFalse {
-    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<(usize, Option<i32>)> {
+impl OpCode<i64> for JumpIfFalse {
+    fn execute(&self, memory: &mut IntcodeVMMemory<i64>, _io: &mut IntcodeVMIO<i64>) -> Option<(usize, Option<i64>)> {
         let addresses = get_parameter_addresses_with_modes(memory, 2);
         if memory[addresses[0]] == 0 {
           Some((usize::try_from(memory[addresses[1]]).unwrap(), None))
@@ -93,8 +93,8 @@ impl OpCode<i32> for JumpIfFalse {
 }
 
 struct LessThan;
-impl OpCode<i32> for LessThan {
-    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<(usize, Option<i32>)> {
+impl OpCode<i64> for LessThan {
+    fn execute(&self, memory: &mut IntcodeVMMemory<i64>, _io: &mut IntcodeVMIO<i64>) -> Option<(usize, Option<i64>)> {
         let addresses = get_parameter_addresses_with_modes(memory, 3);
         let a = memory[addresses[0]];
         let b = memory[addresses[1]];
@@ -104,8 +104,8 @@ impl OpCode<i32> for LessThan {
 }
 
 struct Equals;
-impl OpCode<i32> for Equals {
-    fn execute(&self, memory: &mut IntcodeVMMemory<i32>, _io: &mut IntcodeVMIO<i32>) -> Option<(usize, Option<i32>)> {
+impl OpCode<i64> for Equals {
+    fn execute(&self, memory: &mut IntcodeVMMemory<i64>, _io: &mut IntcodeVMIO<i64>) -> Option<(usize, Option<i64>)> {
         let addresses = get_parameter_addresses_with_modes(memory, 3);
         let a = memory[addresses[0]];
         let b = memory[addresses[1]];
@@ -114,8 +114,8 @@ impl OpCode<i32> for Equals {
     }
 }
 
-pub fn get_ops() -> HashMap<i32, Box<dyn OpCode<i32>>> {
-  let mut ops: HashMap<i32, Box<dyn OpCode<i32>>> = HashMap::new();
+pub fn get_ops() -> HashMap<i64, Box<dyn OpCode<i64>>> {
+  let mut ops: HashMap<i64, Box<dyn OpCode<i64>>> = HashMap::new();
   ops.insert(1, Box::new(Add));
   ops.insert(2, Box::new(Mul));
   ops.insert(3, Box::new(Input));
@@ -128,29 +128,29 @@ pub fn get_ops() -> HashMap<i32, Box<dyn OpCode<i32>>> {
   return ops
 }
 
-fn string_to_i32_list(data: &str) -> Result<Vec<i32>, std::num::ParseIntError> {
+fn string_to_i64_list(data: &str) -> Result<Vec<i64>, std::num::ParseIntError> {
   data
       .split(',')
-      .map(|x| x.parse::<i32>())
-      .collect::<Result<Vec<i32>, std::num::ParseIntError>>()
+      .map(|x| x.parse::<i64>())
+      .collect::<Result<Vec<i64>, std::num::ParseIntError>>()
 }
 
-pub fn load_memory_from_file(filename: &str) -> Result<Vec<i32>, Box<dyn std::error::Error>> {
+pub fn load_memory_from_file(filename: &str) -> Result<Vec<i64>, Box<dyn std::error::Error>> {
   let mut contents = String::new();
   {
       let mut file = File::open(filename)?;
       file.read_to_string(&mut contents)?;
   }
-  Ok(string_to_i32_list(contents.trim())?)
+  Ok(string_to_i64_list(contents.trim())?)
 }
 
-pub fn op_code_lookup(input: i32) -> i32 {
+pub fn op_code_lookup(input: i64) -> i64 {
   input % 100
 }
 
-pub fn load_from_str(program: &str) -> Result<IntcodeVM<i32>, Box<dyn std::error::Error>> {
+pub fn load_from_str(program: &str) -> Result<IntcodeVM<i64>, Box<dyn std::error::Error>> {
   Ok(IntcodeVM::create(
-      string_to_i32_list(program.trim())?,
+      string_to_i64_list(program.trim())?,
       get_ops(),
       &op_code_lookup,
       None,
@@ -158,7 +158,7 @@ pub fn load_from_str(program: &str) -> Result<IntcodeVM<i32>, Box<dyn std::error
   ))
 }
 
-pub fn load_from_file(filename: &str) -> Result<IntcodeVM<i32>, Box<dyn std::error::Error>> {
+pub fn load_from_file(filename: &str) -> Result<IntcodeVM<i64>, Box<dyn std::error::Error>> {
   Ok(IntcodeVM::create(
       load_memory_from_file(filename)?,
       get_ops(),
@@ -170,20 +170,21 @@ pub fn load_from_file(filename: &str) -> Result<IntcodeVM<i32>, Box<dyn std::err
 
 #[cfg(test)]
 mod test {
-    use super::string_to_i32_list;
+    use super::string_to_i64_list;
     use super::load_from_str;
     use super::load_from_file;
 
     #[test]
-    fn string_to_i32_list_testcase() {
-        assert_eq!(string_to_i32_list("12,14").unwrap(), vec!(12, 14))
+    fn string_to_i64_list_testcase() {
+        assert_eq!(string_to_i64_list("12,14").unwrap(), vec!(12, 14))
     }
 
     // Regression tests
     #[test]
     fn test_regression_day1_part1() {
-      let vm = load_from_file("../day-2/part-1/input.txt").unwrap();
-      let last_memory = vm.last().unwrap();
+      let mut vm = load_from_file("../day-2/part-1/input.txt").unwrap();
+      while let Some(_) = vm.next() {};
+      let last_memory = vm.memory.memory;
       assert_eq!(last_memory[0], 9581917);
     }
 
@@ -192,15 +193,17 @@ mod test {
       let mut vm = load_from_file("../day-2/part-2/input.txt").unwrap();
       vm.memory[1] = 25;
       vm.memory[2] = 5;
-      let last_memory = vm.last().unwrap();
+      while let Some(_) = vm.next() {};
+      let last_memory = vm.memory.memory;
       assert_eq!(last_memory[0], 19690720);
     }
 
     // Day 5 part 1
     #[test]
     fn test_parameter_mode_1() {
-      let vm = load_from_str("1002,4,3,4,33").unwrap();
-      let last_memory = vm.last().unwrap();
+      let mut vm = load_from_str("1002,4,3,4,33").unwrap();
+      while let Some(_) = vm.next() {};
+      let last_memory = vm.memory.memory;
       assert_eq!(last_memory, vec!(1002, 4, 3, 4, 99));
     }
 
@@ -523,5 +526,12 @@ mod test {
       vm.last().unwrap();
       assert_eq!(count, 1);
       assert_eq!(last_value, 16694270);
+    }
+
+    // should output the large number in the middle.
+    #[test]
+    fn test_day9_part1_large() {
+      let mut vm = load_from_str("104,1125899906842624,99").unwrap();
+      assert_eq!(vm.collect::<Vec<i64>>(), vec!(1125899906842624));
     }
 }

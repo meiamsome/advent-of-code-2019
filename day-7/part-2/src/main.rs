@@ -7,12 +7,12 @@ use vm::lang::load_from_str;
 
 #[derive(Clone)]
 struct LoopBackIterator<'a> {
-    data: Rc<RwLock<Vec<i32>>>,
-    iter: Rc<Mutex<Option<Box<dyn Iterator<Item=i32> + 'a>>>>,
+    data: Rc<RwLock<Vec<i64>>>,
+    iter: Rc<Mutex<Option<Box<dyn Iterator<Item=i64> + 'a>>>>,
     position: usize
 }
 impl<'a> LoopBackIterator<'a> {
-    fn get_at(&mut self, position: usize) -> Option<i32> {
+    fn get_at(&mut self, position: usize) -> Option<i64> {
         while position >= (*self.data.read().unwrap()).len() {
             let mut iter = self.iter.lock().unwrap();
             if let Some(ref mut iterator) = *iter {
@@ -28,22 +28,22 @@ impl<'a> LoopBackIterator<'a> {
         Some((*self.data.read().unwrap())[position])
     }
 
-    fn set_iter(&mut self, iter: Box<dyn Iterator<Item=i32> + 'a>) {
+    fn set_iter(&mut self, iter: Box<dyn Iterator<Item=i64> + 'a>) {
         *self.iter.lock().unwrap() = Some(iter);
     }
 }
 
 impl Iterator for LoopBackIterator<'_> {
-    type Item = i32;
+    type Item = i64;
 
-    fn next(&mut self) -> Option<i32> {
+    fn next(&mut self) -> Option<i64> {
         let result = self.get_at(self.position);
         self.position += 1;
         result
     }
 }
 
-fn run_with_phases(program: &str, phases: Vec<i32>) -> Result<i32, Box<dyn std::error::Error>>  {
+fn run_with_phases(program: &str, phases: Vec<i64>) -> Result<i64, Box<dyn std::error::Error>>  {
     let mut loop_back = LoopBackIterator {
         data: Rc::new(RwLock::new(vec!(0))),
         iter: Rc::new(Mutex::new(None)),
@@ -51,10 +51,10 @@ fn run_with_phases(program: &str, phases: Vec<i32>) -> Result<i32, Box<dyn std::
     };
     loop_back.set_iter(
         phases.into_iter()
-            .fold::<Result<Box<dyn Iterator<Item=i32>>, Box<dyn std::error::Error>>, _>(
+            .fold::<Result<Box<dyn Iterator<Item=i64>>, Box<dyn std::error::Error>>, _>(
                 Ok(Box::new(loop_back.clone())),
                 |iterator, phase| {
-                    iterator.and_then::<Box<dyn Iterator<Item=i32>>, _>(|iter| {
+                    iterator.and_then::<Box<dyn Iterator<Item=i64>>, _>(|iter| {
                         let mut vm = load_from_str(program)?;
                         vm.io.input = Some(Box::new(vec!(phase).into_iter().chain(iter)));
                         Ok(Box::new(vm))
@@ -66,7 +66,7 @@ fn run_with_phases(program: &str, phases: Vec<i32>) -> Result<i32, Box<dyn std::
     Ok(result)
 }
 
-fn get_optimal_phase(program: &str) -> Result<(i32, (i32, i32, i32, i32, i32)), Box<dyn std::error::Error>> {
+fn get_optimal_phase(program: &str) -> Result<(i64, (i64, i64, i64, i64, i64)), Box<dyn std::error::Error>> {
     let mut max = 0;
     let mut arg_max = (0, 0, 0, 0, 0);
     for a in 5..=9 {
