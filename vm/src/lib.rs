@@ -12,6 +12,22 @@ pub mod lang;
 pub struct IntcodeVMMemory<T> {
     pub instruction_pointer: usize,
     pub memory: Vec<T>,
+    pub metadata: Vec<T>,
+}
+
+impl<T> IntcodeVMMemory<T>
+where
+    T: Copy {
+    fn get(&self, position: usize, default: T) -> T {
+        *self.memory.get(position).unwrap_or(&default)
+    }
+
+    fn set(&mut self, position: usize, value: T, default_memory_value: T) {
+        if position >= self.memory.len() {
+            self.memory.resize(position + 1, default_memory_value)
+        }
+        self.memory[position] = value;
+    }
 }
 
 impl<T> Index<usize> for IntcodeVMMemory<T> {
@@ -62,6 +78,7 @@ where
             memory: IntcodeVMMemory {
                 instruction_pointer: 0,
                 memory: memory,
+                metadata: Vec::new(),
             },
             op_codes: op_codes,
             op_code_map: op_code_map,
