@@ -1,0 +1,12 @@
+name: Run unit tests
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: rust-cargo
+      uses: actions-rs/cargo@v1.0.1
