@@ -1,6 +1,6 @@
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
-use std::collections::HashMap;
 
 fn parse_orbit(input: &str) -> (&str, &str) {
     let split: Vec<&str> = input.split(')').collect();
@@ -15,7 +15,8 @@ fn get_total_orbits(input: &str) -> u32 {
     for (parent, child) in input.split('\n').map(parse_orbit) {
         planets.insert(child, parent);
     }
-    planets.keys()
+    planets
+        .keys()
         .map(|planet| {
             let mut count = 0;
             let mut current = planet;

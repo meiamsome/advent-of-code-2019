@@ -9,17 +9,19 @@ fn main() {
                 for dig4 in dig3..=9 {
                     for dig5 in dig4..=9 {
                         for dig6 in dig5..=9 {
-                            if
-                                dig1 != dig2 &&
-                                dig2 != dig3 &&
-                                dig3 != dig4 &&
-                                dig4 != dig5 &&
-                                dig5 != dig6 {
-                                continue
+                            if dig1 != dig2
+                                && dig2 != dig3
+                                && dig3 != dig4
+                                && dig4 != dig5
+                                && dig5 != dig6
+                            {
+                                continue;
                             }
-                            let num = ((((dig1 * 10 + dig2) * 10 + dig3) * 10 + dig4) * 10 + dig5) * 10 + dig6;
+                            let num = ((((dig1 * 10 + dig2) * 10 + dig3) * 10 + dig4) * 10 + dig5)
+                                * 10
+                                + dig6;
                             if num < min || num > max {
-                                continue
+                                continue;
                             }
 
                             count += 1;
