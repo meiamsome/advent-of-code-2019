@@ -1,12 +1,12 @@
 use std::collections::HashMap;
-use std::sync::{RwLock};
 use std::rc::Rc;
+use std::sync::RwLock;
 use vm::lang::load_from_file;
 
 #[derive(Clone)]
 struct LoopBackIterator {
     data: Rc<RwLock<Vec<i64>>>,
-    position: usize
+    position: usize,
 }
 impl LoopBackIterator {
     fn get_at(&mut self, position: usize) -> Option<i64> {
@@ -35,7 +35,7 @@ enum Dir {
     Up,
     Down,
     Left,
-    Right
+    Right,
 }
 
 impl Dir {
@@ -53,7 +53,7 @@ impl Dir {
                 Dir::Down => Dir::Left,
                 Dir::Left => Dir::Up,
             },
-            _ => panic!()
+            _ => panic!(),
         }
     }
 
@@ -78,14 +78,14 @@ impl From<i64> for Colour {
         match other {
             0 => Colour::Black,
             1 => Colour::White,
-            _ => panic!()
+            _ => panic!(),
         }
     }
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut loop_back = LoopBackIterator {
-        data: Rc::new(RwLock::new(vec!(0))),
+        data: Rc::new(RwLock::new(vec![0])),
         position: 0,
     };
     let mut colours: HashMap<(i64, i64), Colour> = HashMap::new();

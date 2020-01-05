@@ -1,28 +1,29 @@
+use std::collections::HashSet;
 use std::fs::File;
 use std::io::prelude::*;
-use std::collections::HashSet;
 
 use vm::lang::load_from_str;
 
-fn run_with_phases(program: &str, phases: Vec<i64>) -> Result<i64, Box<dyn std::error::Error>>  {
-    Ok(
-        phases.into_iter()
-            .fold::<Result<Box<dyn Iterator<Item=i64>>, Box<dyn std::error::Error>>, _>(
-                Ok(Box::new(vec!(0).into_iter())),
-                |iterator, phase| {
-                    iterator.and_then::<Box<dyn Iterator<Item=i64>>, _>(|iter| {
-                        let mut vm = load_from_str(program)?;
-                        vm.io.input = Some(Box::new(vec!(phase).into_iter().chain(iter)));
-                        Ok(Box::new(vm))
-                    })
-                }
-            )?
-            .last()
-            .unwrap()
-    )
+fn run_with_phases(program: &str, phases: Vec<i64>) -> Result<i64, Box<dyn std::error::Error>> {
+    Ok(phases
+        .into_iter()
+        .fold::<Result<Box<dyn Iterator<Item = i64>>, Box<dyn std::error::Error>>, _>(
+            Ok(Box::new(vec![0].into_iter())),
+            |iterator, phase| {
+                iterator.and_then::<Box<dyn Iterator<Item = i64>>, _>(|iter| {
+                    let mut vm = load_from_str(program)?;
+                    vm.io.input = Some(Box::new(vec![phase].into_iter().chain(iter)));
+                    Ok(Box::new(vm))
+                })
+            },
+        )?
+        .last()
+        .unwrap())
 }
 
-fn get_optimal_phase(program: &str) -> Result<(i64, (i64, i64, i64, i64, i64)), Box<dyn std::error::Error>> {
+fn get_optimal_phase(
+    program: &str,
+) -> Result<(i64, (i64, i64, i64, i64, i64)), Box<dyn std::error::Error>> {
     let mut max = 0;
     let mut arg_max = (0, 0, 0, 0, 0);
     for a in 0..=4 {
@@ -30,10 +31,15 @@ fn get_optimal_phase(program: &str) -> Result<(i64, (i64, i64, i64, i64, i64)), 
             for c in 0..=4 {
                 for d in 0..=4 {
                     for e in 0..=4 {
-                        if vec!(a, b, c, d, e).into_iter().collect::<HashSet<_>>().len() != 5 {
+                        if vec![a, b, c, d, e]
+                            .into_iter()
+                            .collect::<HashSet<_>>()
+                            .len()
+                            != 5
+                        {
                             continue;
                         }
-                        let score = run_with_phases(program, vec!(a, b, c, d, e))?;
+                        let score = run_with_phases(program, vec![a, b, c, d, e])?;
                         if score > max {
                             max = score;
                             arg_max = (a, b, c, d, e);
@@ -46,7 +52,8 @@ fn get_optimal_phase(program: &str) -> Result<(i64, (i64, i64, i64, i64, i64)), 
     Ok((max, arg_max))
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {    let mut contents = String::new();
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut contents = String::new();
     {
         let mut file = File::open("./input.txt")?;
         file.read_to_string(&mut contents)?;
@@ -71,7 +78,10 @@ mod test {
     #[test]
     fn example_2() {
         assert_eq!(
-            get_optimal_phase("3,23,3,24,1002,24,10,24,1002,23,-1,23,101,5,23,23,1,24,23,23,4,23,99,0,0").unwrap(),
+            get_optimal_phase(
+                "3,23,3,24,1002,24,10,24,1002,23,-1,23,101,5,23,23,1,24,23,23,4,23,99,0,0"
+            )
+            .unwrap(),
             (54321, (0, 1, 2, 3, 4)),
         )
     }

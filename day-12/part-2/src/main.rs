@@ -1,5 +1,5 @@
-use std::ops::{Add, Sub};
 use std::iter::Sum;
+use std::ops::{Add, Sub};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 struct Vector3(i64, i64, i64);
@@ -32,7 +32,7 @@ fn moon_energy(moon: &(Vector3, Vector3)) -> i64 {
 
 #[derive(Clone)]
 struct NBodySim {
-    bodies: Vec<(Vector3, Vector3)>
+    bodies: Vec<(Vector3, Vector3)>,
 }
 
 impl NBodySim {
@@ -49,23 +49,21 @@ fn accelerate(pos: &Vector3, other_pos: &Vector3) -> Vector3 {
             -1
         } else {
             0
-        }
-    ,
+        },
         if pos.1 < other_pos.1 {
             1
         } else if pos.1 > other_pos.1 {
             -1
         } else {
             0
-        }
-    ,
+        },
         if pos.2 < other_pos.2 {
             1
         } else if pos.2 > other_pos.2 {
             -1
         } else {
             0
-        }
+        },
     )
 }
 
@@ -73,17 +71,17 @@ impl Iterator for NBodySim {
     type Item = Vec<(Vector3, Vector3)>;
 
     fn next(&mut self) -> Option<Vec<(Vector3, Vector3)>> {
-        self.bodies = self.bodies
+        self.bodies = self
+            .bodies
             .iter()
             .enumerate()
             .map(|(index, (pos, vel))| {
-                let new_vel = self.bodies
+                let new_vel = self
+                    .bodies
                     .iter()
                     .enumerate()
                     .filter(|(index2, _)| index != *index2)
-                    .map(|(_, (other_pos, _))| {
-                        accelerate(pos, other_pos)
-                    })
+                    .map(|(_, (other_pos, _))| accelerate(pos, other_pos))
                     .fold(vel.clone(), |acc, val| acc + val);
                 (*pos + new_vel, new_vel)
             })
@@ -101,24 +99,24 @@ fn loops(mut simulation: NBodySim) -> usize {
         iter += 1;
         if let Some(bodies) = simulation.next() {
             if bodies == start_bodies {
-                break
+                break;
             }
         } else {
             panic!()
         }
-    };
+    }
 
     iter
 }
 
 fn main() {
     let simulation = NBodySim {
-        bodies: vec!(
-            (Vector3(-5,  6, -11), Vector3(0, 0, 0)),
-            (Vector3(-8, -4,  -2), Vector3(0, 0, 0)),
-            (Vector3( 1, 16,   4), Vector3(0, 0, 0)),
-            (Vector3( 11, 11,  -4), Vector3(0, 0, 0)),
-        )
+        bodies: vec![
+            (Vector3(-5, 6, -11), Vector3(0, 0, 0)),
+            (Vector3(-8, -4, -2), Vector3(0, 0, 0)),
+            (Vector3(1, 16, 4), Vector3(0, 0, 0)),
+            (Vector3(11, 11, -4), Vector3(0, 0, 0)),
+        ],
     };
 
     let mut simulation_x = simulation.clone();
@@ -157,120 +155,111 @@ mod test {
     #[test]
     fn example_1() {
         let mut simulation = NBodySim {
-            bodies: vec!(
-                (Vector3(-1,   0,  2), Vector3(0, 0, 0)),
-                (Vector3( 2, -10, -7), Vector3(0, 0, 0)),
-                (Vector3( 4,  -8,  8), Vector3(0, 0, 0)),
-                (Vector3( 3,   5, -1), Vector3(0, 0, 0)),
-            )
+            bodies: vec![
+                (Vector3(-1, 0, 2), Vector3(0, 0, 0)),
+                (Vector3(2, -10, -7), Vector3(0, 0, 0)),
+                (Vector3(4, -8, 8), Vector3(0, 0, 0)),
+                (Vector3(3, 5, -1), Vector3(0, 0, 0)),
+            ],
         };
 
         assert_eq!(
             simulation.next(),
             Some(vec!(
-                (Vector3( 2, -1,  1), Vector3( 3, -1, -1)),
-                (Vector3( 3, -7, -4), Vector3( 1,  3,  3)),
-                (Vector3( 1, -7,  5), Vector3(-3,  1, -3)),
-                (Vector3( 2,  2,  0), Vector3(-1, -3,  1)),
+                (Vector3(2, -1, 1), Vector3(3, -1, -1)),
+                (Vector3(3, -7, -4), Vector3(1, 3, 3)),
+                (Vector3(1, -7, 5), Vector3(-3, 1, -3)),
+                (Vector3(2, 2, 0), Vector3(-1, -3, 1)),
             ))
         );
-
 
         assert_eq!(
             simulation.next(),
             Some(vec!(
-                (Vector3( 5, -3, -1), Vector3( 3, -2, -2)),
-                (Vector3( 1, -2,  2), Vector3(-2,  5,  6)),
-                (Vector3( 1, -4, -1), Vector3( 0,  3, -6)),
-                (Vector3( 1, -4,  2), Vector3(-1, -6,  2)),
+                (Vector3(5, -3, -1), Vector3(3, -2, -2)),
+                (Vector3(1, -2, 2), Vector3(-2, 5, 6)),
+                (Vector3(1, -4, -1), Vector3(0, 3, -6)),
+                (Vector3(1, -4, 2), Vector3(-1, -6, 2)),
             ))
         );
-
 
         assert_eq!(
             simulation.next(),
             Some(vec!(
-                (Vector3( 5, -6, -1), Vector3( 0, -3,  0)),
-                (Vector3( 0,  0,  6), Vector3(-1,  2,  4)),
-                (Vector3( 2,  1, -5), Vector3( 1,  5, -4)),
-                (Vector3( 1, -8,  2), Vector3( 0, -4,  0)),
+                (Vector3(5, -6, -1), Vector3(0, -3, 0)),
+                (Vector3(0, 0, 6), Vector3(-1, 2, 4)),
+                (Vector3(2, 1, -5), Vector3(1, 5, -4)),
+                (Vector3(1, -8, 2), Vector3(0, -4, 0)),
             ))
         );
-
 
         assert_eq!(
             simulation.next(),
             Some(vec!(
-                (Vector3( 2, -8,  0), Vector3(-3, -2,  1)),
-                (Vector3( 2,  1,  7), Vector3( 2,  1,  1)),
-                (Vector3( 2,  3, -6), Vector3( 0,  2, -1)),
-                (Vector3( 2, -9,  1), Vector3( 1, -1, -1)),
+                (Vector3(2, -8, 0), Vector3(-3, -2, 1)),
+                (Vector3(2, 1, 7), Vector3(2, 1, 1)),
+                (Vector3(2, 3, -6), Vector3(0, 2, -1)),
+                (Vector3(2, -9, 1), Vector3(1, -1, -1)),
             ))
         );
-
 
         assert_eq!(
             simulation.next(),
             Some(vec!(
-                (Vector3(-1, -9,  2), Vector3(-3, -1,  2)),
-                (Vector3( 4,  1,  5), Vector3( 2,  0, -2)),
-                (Vector3( 2,  2, -4), Vector3( 0, -1,  2)),
-                (Vector3( 3, -7, -1), Vector3( 1,  2, -2)),
+                (Vector3(-1, -9, 2), Vector3(-3, -1, 2)),
+                (Vector3(4, 1, 5), Vector3(2, 0, -2)),
+                (Vector3(2, 2, -4), Vector3(0, -1, 2)),
+                (Vector3(3, -7, -1), Vector3(1, 2, -2)),
             ))
         );
-
 
         assert_eq!(
             simulation.next(),
             Some(vec!(
-                (Vector3(-1, -7,  3), Vector3( 0,  2,  1)),
-                (Vector3( 3,  0,  0), Vector3(-1, -1, -5)),
-                (Vector3( 3, -2,  1), Vector3( 1, -4,  5)),
-                (Vector3( 3, -4, -2), Vector3( 0,  3, -1)),
+                (Vector3(-1, -7, 3), Vector3(0, 2, 1)),
+                (Vector3(3, 0, 0), Vector3(-1, -1, -5)),
+                (Vector3(3, -2, 1), Vector3(1, -4, 5)),
+                (Vector3(3, -4, -2), Vector3(0, 3, -1)),
             ))
         );
-
 
         assert_eq!(
             simulation.next(),
             Some(vec!(
-                (Vector3( 2, -2,  1), Vector3( 3,  5, -2)),
-                (Vector3( 1, -4, -4), Vector3(-2, -4, -4)),
-                (Vector3( 3, -7,  5), Vector3( 0, -5,  4)),
-                (Vector3( 2,  0,  0), Vector3(-1,  4,  2)),
+                (Vector3(2, -2, 1), Vector3(3, 5, -2)),
+                (Vector3(1, -4, -4), Vector3(-2, -4, -4)),
+                (Vector3(3, -7, 5), Vector3(0, -5, 4)),
+                (Vector3(2, 0, 0), Vector3(-1, 4, 2)),
             ))
         );
-
 
         assert_eq!(
             simulation.next(),
             Some(vec!(
-                (Vector3( 5,  2, -2), Vector3( 3,  4, -3)),
-                (Vector3( 2, -7, -5), Vector3( 1, -3, -1)),
-                (Vector3( 0, -9,  6), Vector3(-3, -2,  1)),
-                (Vector3( 1,  1,  3), Vector3(-1,  1,  3)),
+                (Vector3(5, 2, -2), Vector3(3, 4, -3)),
+                (Vector3(2, -7, -5), Vector3(1, -3, -1)),
+                (Vector3(0, -9, 6), Vector3(-3, -2, 1)),
+                (Vector3(1, 1, 3), Vector3(-1, 1, 3)),
             ))
         );
-
 
         assert_eq!(
             simulation.next(),
             Some(vec!(
-                (Vector3( 5,  3, -4), Vector3( 0,  1, -2)),
-                (Vector3( 2, -9, -3), Vector3( 0, -2,  2)),
-                (Vector3( 0, -8,  4), Vector3( 0,  1, -2)),
-                (Vector3( 1,  1,  5), Vector3( 0,  0,  2)),
+                (Vector3(5, 3, -4), Vector3(0, 1, -2)),
+                (Vector3(2, -9, -3), Vector3(0, -2, 2)),
+                (Vector3(0, -8, 4), Vector3(0, 1, -2)),
+                (Vector3(1, 1, 5), Vector3(0, 0, 2)),
             ))
         );
-
 
         assert_eq!(
             simulation.next(),
             Some(vec!(
-                (Vector3( 2,  1, -3), Vector3(-3, -2,  1)),
-                (Vector3( 1, -8,  0), Vector3(-1,  1,  3)),
-                (Vector3( 3, -6,  1), Vector3( 3,  2, -3)),
-                (Vector3( 2,  0,  4), Vector3( 1, -1, -1)),
+                (Vector3(2, 1, -3), Vector3(-3, -2, 1)),
+                (Vector3(1, -8, 0), Vector3(-1, 1, 3)),
+                (Vector3(3, -6, 1), Vector3(3, 2, -3)),
+                (Vector3(2, 0, 4), Vector3(1, -1, -1)),
             ))
         );
 

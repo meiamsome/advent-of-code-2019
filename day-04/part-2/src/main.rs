@@ -9,8 +9,8 @@ fn main() {
                 for dig4 in dig3..=9 {
                     for dig5 in dig4..=9 {
                         for dig6 in dig5..=9 {
-                            let mut sets = vec!((dig1, 1));
-                            for x in vec!(dig2, dig3, dig4, dig5, dig6).into_iter() {
+                            let mut sets = vec![(dig1, 1)];
+                            for x in vec![dig2, dig3, dig4, dig5, dig6].into_iter() {
                                 if x == sets.last().unwrap().0 {
                                     sets.last_mut().unwrap().1 += 1;
                                 } else {
@@ -19,12 +19,14 @@ fn main() {
                             }
 
                             if !sets.into_iter().any(|(_, len)| len == 2) {
-                                continue
+                                continue;
                             }
 
-                            let num = ((((dig1 * 10 + dig2) * 10 + dig3) * 10 + dig4) * 10 + dig5) * 10 + dig6;
+                            let num = ((((dig1 * 10 + dig2) * 10 + dig3) * 10 + dig4) * 10 + dig5)
+                                * 10
+                                + dig6;
                             if num < min || num > max {
-                                continue
+                                continue;
                             }
 
                             count += 1;

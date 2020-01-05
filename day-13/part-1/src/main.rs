@@ -1,6 +1,6 @@
 use std::collections::HashMap;
-use std::sync::{RwLock};
 use std::rc::Rc;
+use std::sync::RwLock;
 use vm::lang::load_from_file;
 
 #[derive(Clone, Copy, PartialEq)]
@@ -20,7 +20,7 @@ impl From<i64> for Tile {
             2 => Tile::Block,
             3 => Tile::Paddle,
             4 => Tile::Ball,
-            _ => panic!()
+            _ => panic!(),
         }
     }
 }
@@ -50,16 +50,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let max_y = *tiles.keys().map(|(_, y)| y).max().unwrap();
     for y in min_y..=max_y {
         for x in min_x..=max_x {
-            print!("{}", match *tiles.get(&(x, y)).unwrap_or(&Tile::Empty) {
-                Tile::Empty => " ",
-                Tile::Wall => "█",
-                Tile::Block => "░",
-                Tile::Paddle => "▔",
-                Tile::Ball => "•",
-            });
+            print!(
+                "{}",
+                match *tiles.get(&(x, y)).unwrap_or(&Tile::Empty) {
+                    Tile::Empty => " ",
+                    Tile::Wall => "█",
+                    Tile::Block => "░",
+                    Tile::Paddle => "▔",
+                    Tile::Ball => "•",
+                }
+            );
         }
         println!("");
     }
-    println!("Blocks: {}", tiles.values().filter(|&&x| x == Tile::Block).count());
+    println!(
+        "Blocks: {}",
+        tiles.values().filter(|&&x| x == Tile::Block).count()
+    );
     Ok(())
 }

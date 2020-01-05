@@ -1,9 +1,13 @@
 use std::fs::File;
 use std::io::prelude::*;
 
-use std::collections::{HashSet, HashMap};
+use std::collections::{HashMap, HashSet};
 
-fn trace_step(step: i32, from: (i32, i32), instruction: &str) -> (i32, (i32, i32), HashMap<(i32, i32), i32>) {
+fn trace_step(
+    step: i32,
+    from: (i32, i32),
+    instruction: &str,
+) -> (i32, (i32, i32), HashMap<(i32, i32), i32>) {
     let (direction, len_str) = instruction.split_at(1);
     let len = len_str.parse::<i32>().unwrap();
     let component = match direction {
@@ -38,7 +42,7 @@ fn trace_wire(instructions: &str) -> HashMap<(i32, i32), i32> {
             new_map
                 .into_iter()
                 .filter(|(key, _)| !map.contains_key(key))
-                .collect::<Vec<((i32, i32), i32)>>()
+                .collect::<Vec<((i32, i32), i32)>>(),
         );
     }
     map
@@ -47,7 +51,10 @@ fn trace_wire(instructions: &str) -> HashMap<(i32, i32), i32> {
 fn find_intersections(instruction_sets: &str) -> HashMap<(i32, i32), i32> {
     let instructions: Vec<&str> = instruction_sets.split_whitespace().collect();
     if instructions.len() != 2 {
-        panic!("Only two instruction sets allowed, found {}", instructions.len());
+        panic!(
+            "Only two instruction sets allowed, found {}",
+            instructions.len()
+        );
     }
     let map_a = trace_wire(instructions[0]);
     let set_a: HashSet<&(i32, i32)> = map_a.keys().collect();
@@ -65,10 +72,10 @@ fn smallest_intersection(instruction_sets: &str) -> Option<((i32, i32), i32)> {
         .fold(None, |best, ((pos_x, pos_y), len)| {
             if let Some((_, best_len)) = best {
                 if best_len < len {
-                    return best
+                    return best;
                 }
             }
-            return Some(((pos_x, pos_y), len))
+            return Some(((pos_x, pos_y), len));
         })
 }
 
@@ -85,14 +92,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 #[cfg(test)]
 mod test {
-    use super::trace_step;
-    use super::trace_wire;
     use super::find_intersections;
     use super::smallest_intersection;
+    use super::trace_step;
+    use super::trace_wire;
 
     #[test]
     fn trace_step_1() {
-        let result_set = vec!(
+        let result_set = vec![
             ((1, 0), 1),
             ((2, 0), 2),
             ((3, 0), 3),
@@ -101,54 +108,46 @@ mod test {
             ((6, 0), 6),
             ((7, 0), 7),
             ((8, 0), 8),
-        ).into_iter().collect();
-        assert_eq!(
-            trace_step(0, (0, 0), "R8"),
-            (8, (8, 0), result_set)
-        );
+        ]
+        .into_iter()
+        .collect();
+        assert_eq!(trace_step(0, (0, 0), "R8"), (8, (8, 0), result_set));
     }
 
     #[test]
     fn trace_step_2() {
-        let result_set = vec!(
+        let result_set = vec![
             ((8, 1), 9),
             ((8, 2), 10),
             ((8, 3), 11),
             ((8, 4), 12),
             ((8, 5), 13),
-        ).into_iter().collect();
-        assert_eq!(
-            trace_step(8, (8, 0), "U5"),
-            (13, (8, 5), result_set)
-        );
+        ]
+        .into_iter()
+        .collect();
+        assert_eq!(trace_step(8, (8, 0), "U5"), (13, (8, 5), result_set));
     }
 
     #[test]
     fn trace_step_3() {
-        let result_set = vec!(
+        let result_set = vec![
             ((7, 5), 14),
             ((6, 5), 15),
             ((5, 5), 16),
             ((4, 5), 17),
             ((3, 5), 18),
-        ).into_iter().collect();
-        assert_eq!(
-            trace_step(13, (8, 5), "L5"),
-            (18, (3, 5), result_set)
-        );
+        ]
+        .into_iter()
+        .collect();
+        assert_eq!(trace_step(13, (8, 5), "L5"), (18, (3, 5), result_set));
     }
 
     #[test]
     fn trace_step_4() {
-        let result_set = vec!(
-            ((3, 4), 19),
-            ((3, 3), 20),
-            ((3, 2), 21),
-        ).into_iter().collect();
-        assert_eq!(
-            trace_step(18, (3, 5), "D3"),
-            (21, (3, 2), result_set)
-        );
+        let result_set = vec![((3, 4), 19), ((3, 3), 20), ((3, 2), 21)]
+            .into_iter()
+            .collect();
+        assert_eq!(trace_step(18, (3, 5), "D3"), (21, (3, 2), result_set));
     }
 
     #[test]
@@ -177,7 +176,9 @@ mod test {
                 ((3, 4), 19),
                 ((3, 3), 20),
                 ((3, 2), 21),
-            ).into_iter().collect()
+            )
+            .into_iter()
+            .collect()
         )
     }
 
@@ -204,20 +205,17 @@ mod test {
                 // ((3, 0), 15),
                 ((3, -1), 16),
                 ((3, -2), 17),
-            ).into_iter().collect()
+            )
+            .into_iter()
+            .collect()
         )
     }
 
     #[test]
     fn find_intersections_1() {
         assert_eq!(
-            find_intersections(
-                "R8,U5,L5,D3\nU7,R6,D4,L4"
-            ),
-            vec!(
-                ((3, 3), 40),
-                ((6, 5), 30),
-            ).into_iter().collect()
+            find_intersections("R8,U5,L5,D3\nU7,R6,D4,L4"),
+            vec!(((3, 3), 40), ((6, 5), 30),).into_iter().collect()
         )
     }
 
@@ -232,7 +230,9 @@ mod test {
                 ((155, 11), 850),
                 ((158, -12), 610),
                 ((155, 4), 726),
-            ).into_iter().collect()
+            )
+            .into_iter()
+            .collect()
         )
     }
 
@@ -248,16 +248,16 @@ mod test {
                 ((107, 71), 636),
                 ((124, 11), 516),
                 ((157, 18), 650),
-            ).into_iter().collect()
+            )
+            .into_iter()
+            .collect()
         )
     }
 
     #[test]
     fn smallest_intersection_1() {
         assert_eq!(
-            smallest_intersection(
-                "R8,U5,L5,D3\nU7,R6,D4,L4"
-            ),
+            smallest_intersection("R8,U5,L5,D3\nU7,R6,D4,L4"),
             Some(((6, 5), 30))
         )
     }

@@ -1,24 +1,28 @@
+use std::fmt;
 use std::fs::File;
 use std::io::prelude::*;
 use std::iter::FromIterator;
-use std::fmt;
 
 #[derive(Debug)]
 struct Layer {
     width: usize,
     height: usize,
-    data: Vec<u32>
+    data: Vec<u32>,
 }
 
 impl Layer {
     fn from_vec(input: Vec<u32>, width: usize, height: usize) -> Layer {
         if input.len() != width * height {
-            panic!("Invalid layer format: {} != {}", input.len(), width * height);
+            panic!(
+                "Invalid layer format: {} != {}",
+                input.len(),
+                width * height
+            );
         }
         Layer {
             width,
             height,
-            data: input
+            data: input,
         }
     }
 }
@@ -27,13 +31,16 @@ impl Layer {
 struct Image {
     width: usize,
     height: usize,
-    layers: Vec<Layer>
+    layers: Vec<Layer>,
 }
 
 impl Image {
     fn from_vec(input: Vec<u32>, width: usize, height: usize) -> Image {
         if input.len() % (width * height) != 0 {
-            panic!("Invalid file format: {} extra bytes", input.len() % (width * height));
+            panic!(
+                "Invalid file format: {} extra bytes",
+                input.len() % (width * height)
+            );
         }
         Image {
             width,
@@ -48,26 +55,31 @@ impl Image {
 
 impl fmt::Display for Image {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.layers[0].data.iter()
-            .enumerate()
-            .map(|(i, _)| self.layers.iter().fold(2, |current, ref layer| {
-                if current == 2 {
-                    layer.data[i]
-                } else {
-                    current
-                }
-            }))
-            .map(|x| std::char::from_digit(x, 10).unwrap())
-            .collect::<Vec<char>>()
-            .chunks(self.width)
-            .map(|x| {
-                let mut vec = x.to_vec();
-                vec.push('\n');
-                String::from_iter(vec)
-            })
-            .collect::<Vec<String>>()
-            .into_iter()
-            .collect::<String>()
+        write!(
+            f,
+            "{}",
+            self.layers[0]
+                .data
+                .iter()
+                .enumerate()
+                .map(|(i, _)| self.layers.iter().fold(2, |current, ref layer| {
+                    if current == 2 {
+                        layer.data[i]
+                    } else {
+                        current
+                    }
+                }))
+                .map(|x| std::char::from_digit(x, 10).unwrap())
+                .collect::<Vec<char>>()
+                .chunks(self.width)
+                .map(|x| {
+                    let mut vec = x.to_vec();
+                    vec.push('\n');
+                    String::from_iter(vec)
+                })
+                .collect::<Vec<String>>()
+                .into_iter()
+                .collect::<String>()
         )
     }
 }
