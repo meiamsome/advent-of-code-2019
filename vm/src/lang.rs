@@ -196,16 +196,16 @@ mod test {
 
     // Regression tests
     #[test]
-    fn test_regression_day1_part1() {
-      let mut vm = load_from_file("../day-2/part-1/input.txt").unwrap();
+    fn test_regression_day2_part1() {
+      let mut vm = load_from_file("../day-02/part-1/input.txt").unwrap();
       while let Some(_) = vm.next() {};
       let last_memory = vm.memory.memory;
       assert_eq!(last_memory[0], 9581917);
     }
 
     #[test]
-    fn test_regression_day1_part2() {
-      let mut vm = load_from_file("../day-2/part-2/input.txt").unwrap();
+    fn test_regression_day2_part2() {
+      let mut vm = load_from_file("../day-02/part-2/input.txt").unwrap();
       vm.memory[1] = 25;
       vm.memory[2] = 5;
       while let Some(_) = vm.next() {};
@@ -225,7 +225,7 @@ mod test {
     // regression
     #[test]
     fn test_regression_day5_part1() {
-      let mut vm = load_from_file("../day-5/part-1/input.txt").unwrap();
+      let mut vm = load_from_file("../day-05/part-1/input.txt").unwrap();
       vm.io.input = Some(Box::new(vec!(1).into_iter()));
       let mut count = 0;
       let mut last_value = 0;
@@ -530,7 +530,7 @@ mod test {
     // regression
     #[test]
     fn test_regression_day5_part2() {
-      let mut vm = load_from_file("../day-5/part-1/input.txt").unwrap();
+      let mut vm = load_from_file("../day-05/part-1/input.txt").unwrap();
       vm.io.input = Some(Box::new(vec!(5).into_iter()));
       let mut count = 0;
       let mut last_value = 0;
