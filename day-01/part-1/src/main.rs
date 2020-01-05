@@ -50,7 +50,7 @@ mod test {
 
     #[test]
     fn module_mass_to_fuel_mass_1969() {
-        assert_eq!(module_mass_to_fuel(1969), 6524)
+        assert_eq!(module_mass_to_fuel(1969), 654)
     }
 
     #[test]
