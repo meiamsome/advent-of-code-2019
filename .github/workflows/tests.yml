@@ -13,6 +13,9 @@ jobs:
       with:
         command: test
 
+    - name: run all days
+      run: ./run-all-days.sh
+
   fmt:
     name: Rustfmt
     runs-on: ubuntu-latest
