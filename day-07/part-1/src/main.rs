@@ -4,10 +4,13 @@ use std::io::prelude::*;
 
 use vm::lang::load_from_str;
 
-fn run_with_phases(program: &str, phases: Vec<i64>) -> Result<i64, Box<dyn std::error::Error>> {
+type StandardError<T> = Result<T, Box<dyn std::error::Error>>;
+type Phase = (i64, i64, i64, i64, i64);
+
+fn run_with_phases(program: &str, phases: Vec<i64>) -> StandardError<i64> {
     Ok(phases
         .into_iter()
-        .fold::<Result<Box<dyn Iterator<Item = i64>>, Box<dyn std::error::Error>>, _>(
+        .fold::<StandardError<Box<dyn Iterator<Item = i64>>>, _>(
             Ok(Box::new(vec![0].into_iter())),
             |iterator, phase| {
                 iterator.and_then::<Box<dyn Iterator<Item = i64>>, _>(|iter| {
@@ -21,9 +24,7 @@ fn run_with_phases(program: &str, phases: Vec<i64>) -> Result<i64, Box<dyn std::
         .unwrap())
 }
 
-fn get_optimal_phase(
-    program: &str,
-) -> Result<(i64, (i64, i64, i64, i64, i64)), Box<dyn std::error::Error>> {
+fn get_optimal_phase(program: &str) -> StandardError<(i64, Phase)> {
     let mut max = 0;
     let mut arg_max = (0, 0, 0, 0, 0);
     for a in 0..=4 {
@@ -52,7 +53,7 @@ fn get_optimal_phase(
     Ok((max, arg_max))
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() -> StandardError<()> {
     let mut contents = String::new();
     {
         let mut file = File::open("./input.txt")?;

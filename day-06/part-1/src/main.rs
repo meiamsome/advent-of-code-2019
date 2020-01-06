@@ -26,7 +26,7 @@ fn get_total_orbits(input: &str) -> u32 {
             }
             count
         })
-        .fold(0, |a, b| a + b)
+        .sum()
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

@@ -93,19 +93,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut pos = (0, 0);
     let mut vm = load_from_file("./input.txt")?;
     vm.io.input = Some(Box::new(loop_back.clone()));
-    loop {
-        if let Some(paint) = vm.next() {
-            colours.insert(pos, paint.into());
-            if let Some(turn) = vm.next() {
-                dir = dir.turn(turn);
-                pos = dir.move_in_dir(pos);
-                loop_back.push(*colours.get(&pos).unwrap_or(&Colour::Black) as i64);
-            } else {
-                break;
-            }
-        } else {
-            break;
-        }
+    while let Some(paint) = vm.next() {
+        colours.insert(pos, paint.into());
+        let turn = vm.next().expect("Turn is required");
+        dir = dir.turn(turn);
+        pos = dir.move_in_dir(pos);
+        loop_back.push(*colours.get(&pos).unwrap_or(&Colour::Black) as i64);
     }
     println!("Painted tiles: {}", colours.len());
     let min_x = *colours.keys().map(|(x, _)| x).min().unwrap();
@@ -123,7 +116,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
             );
         }
-        println!("");
+        println!();
     }
     Ok(())
 }

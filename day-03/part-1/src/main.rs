@@ -44,7 +44,7 @@ fn find_intersections(instruction_sets: &str) -> HashSet<(i32, i32)> {
     }
     let set_a = trace_wire(instructions[0]);
     let set_b = trace_wire(instructions[1]);
-    set_a.intersection(&set_b).map(|&x| x).collect()
+    set_a.intersection(&set_b).copied().collect()
 }
 
 fn smallest_intersection(instruction_sets: &str) -> Option<((i32, i32), i32)> {
@@ -57,7 +57,7 @@ fn smallest_intersection(instruction_sets: &str) -> Option<((i32, i32), i32)> {
                     return best;
                 }
             }
-            return Some(((pos_x, pos_y), len));
+            Some(((pos_x, pos_y), len))
         })
 }
 

@@ -1,6 +1,4 @@
 use std::collections::HashMap;
-use std::rc::Rc;
-use std::sync::RwLock;
 use vm::lang::load_from_file;
 
 #[derive(Clone, Copy, PartialEq)]
@@ -28,19 +26,15 @@ impl From<i64> for Tile {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut tiles: HashMap<(i64, i64), Tile> = HashMap::new();
     let mut vm = load_from_file("./input.txt")?;
-    loop {
-        if let Some(x) = vm.next() {
-            if let Some(y) = vm.next() {
-                if let Some(tile_id) = vm.next() {
-                    tiles.insert((x, y), tile_id.into());
-                } else {
-                    panic!()
-                }
+    while let Some(x) = vm.next() {
+        if let Some(y) = vm.next() {
+            if let Some(tile_id) = vm.next() {
+                tiles.insert((x, y), tile_id.into());
             } else {
                 panic!()
             }
         } else {
-            break;
+            panic!()
         }
     }
     println!("Painted tiles: {}", tiles.len());
@@ -61,7 +55,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
             );
         }
-        println!("");
+        println!();
     }
     println!(
         "Blocks: {}",

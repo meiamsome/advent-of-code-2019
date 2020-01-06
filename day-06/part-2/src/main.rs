@@ -31,13 +31,10 @@ fn get_planet_ancestors(input: &str) -> HashMap<&str, Vec<&str>> {
 
 fn get_shortest_path<'a>(ancestors: HashMap<&'a str, Vec<&'a str>>, from: &str, to: &str) -> usize {
     let mut from_list: HashSet<&str> = HashSet::new();
-    from_list.extend(ancestors.get(from).expect("From not in map").into_iter());
+    from_list.extend(ancestors.get(from).expect("From not in map").iter());
     let mut to_list: HashSet<&str> = HashSet::new();
-    to_list.extend(ancestors.get(to).expect("To not in map").into_iter());
-    from_list
-        .symmetric_difference(&to_list)
-        .collect::<Vec<_>>()
-        .len()
+    to_list.extend(ancestors.get(to).expect("To not in map").iter());
+    from_list.symmetric_difference(&to_list).count()
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

@@ -5,6 +5,9 @@ use std::rc::Rc;
 use std::sync::{Mutex, RwLock};
 use vm::lang::load_from_str;
 
+type StandardError<T> = Result<T, Box<dyn std::error::Error>>;
+type Phase = (i64, i64, i64, i64, i64);
+
 #[derive(Clone)]
 struct LoopBackIterator<'a> {
     data: Rc<RwLock<Vec<i64>>>,
@@ -43,7 +46,7 @@ impl Iterator for LoopBackIterator<'_> {
     }
 }
 
-fn run_with_phases(program: &str, phases: Vec<i64>) -> Result<i64, Box<dyn std::error::Error>> {
+fn run_with_phases(program: &str, phases: Vec<i64>) -> StandardError<i64> {
     let mut loop_back = LoopBackIterator {
         data: Rc::new(RwLock::new(vec![0])),
         iter: Rc::new(Mutex::new(None)),
@@ -66,9 +69,7 @@ fn run_with_phases(program: &str, phases: Vec<i64>) -> Result<i64, Box<dyn std::
     Ok(result)
 }
 
-fn get_optimal_phase(
-    program: &str,
-) -> Result<(i64, (i64, i64, i64, i64, i64)), Box<dyn std::error::Error>> {
+fn get_optimal_phase(program: &str) -> StandardError<(i64, Phase)> {
     let mut max = 0;
     let mut arg_max = (0, 0, 0, 0, 0);
     for a in 5..=9 {
@@ -97,7 +98,7 @@ fn get_optimal_phase(
     Ok((max, arg_max))
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() -> StandardError<()> {
     let mut contents = String::new();
     {
         let mut file = File::open("./input.txt")?;
@@ -116,7 +117,7 @@ mod test {
     fn example_1() {
         assert_eq!(
             get_optimal_phase("3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5").unwrap(),
-            (139629729, (9, 8, 7, 6, 5)),
+            (139_629_729, (9, 8, 7, 6, 5)),
         )
     }
 
@@ -124,7 +125,7 @@ mod test {
     fn example_2() {
         assert_eq!(
             get_optimal_phase("3,52,1001,52,-5,52,3,53,1,52,56,54,1007,54,5,55,1005,55,26,1001,54,-5,54,1105,1,12,1,53,54,53,1008,54,0,55,1001,55,1,55,2,53,55,53,4,53,1001,56,-1,56,1005,56,6,99,0,0,0,0,10").unwrap(),
-            (18216, (9, 7, 8, 5, 6)),
+            (18_216, (9, 7, 8, 5, 6)),
         )
     }
 }

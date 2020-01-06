@@ -1,4 +1,4 @@
-use std::iter::Sum;
+use std::cmp::Ordering;
 use std::ops::{Add, Sub};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -20,49 +20,27 @@ impl Sub<Vector3> for Vector3 {
     }
 }
 
-impl Vector3 {
-    fn energy(&self) -> i64 {
-        self.0.abs() + self.1.abs() + self.2.abs()
-    }
-}
-
-fn moon_energy(moon: &(Vector3, Vector3)) -> i64 {
-    (*moon).0.energy() * (*moon).1.energy()
-}
-
 #[derive(Clone)]
 struct NBodySim {
     bodies: Vec<(Vector3, Vector3)>,
 }
 
-impl NBodySim {
-    fn energy(&self) -> i64 {
-        i64::sum(self.bodies.iter().map(moon_energy))
-    }
-}
-
 fn accelerate(pos: &Vector3, other_pos: &Vector3) -> Vector3 {
     Vector3(
-        if pos.0 < other_pos.0 {
-            1
-        } else if pos.0 > other_pos.0 {
-            -1
-        } else {
-            0
+        match pos.0.cmp(&other_pos.0) {
+            Ordering::Greater => -1,
+            Ordering::Less => 1,
+            Ordering::Equal => 0,
         },
-        if pos.1 < other_pos.1 {
-            1
-        } else if pos.1 > other_pos.1 {
-            -1
-        } else {
-            0
+        match pos.1.cmp(&other_pos.1) {
+            Ordering::Greater => -1,
+            Ordering::Less => 1,
+            Ordering::Equal => 0,
         },
-        if pos.2 < other_pos.2 {
-            1
-        } else if pos.2 > other_pos.2 {
-            -1
-        } else {
-            0
+        match pos.2.cmp(&other_pos.2) {
+            Ordering::Greater => -1,
+            Ordering::Less => 1,
+            Ordering::Equal => 0,
         },
     )
 }
@@ -137,7 +115,7 @@ fn main() {
     }
     let iter_y = loops(simulation_y);
 
-    let mut simulation_z = simulation.clone();
+    let mut simulation_z = simulation;
     for (pos, vel) in simulation_z.bodies.iter_mut() {
         pos.0 = 0;
         pos.1 = 0;
@@ -262,7 +240,5 @@ mod test {
                 (Vector3(2, 0, 4), Vector3(1, -1, -1)),
             ))
         );
-
-        assert_eq!(simulation.energy(), 179);
     }
 }

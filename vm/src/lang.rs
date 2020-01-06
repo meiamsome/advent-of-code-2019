@@ -100,7 +100,9 @@ impl OpCode<i64> for Output {
         io: &mut IntcodeVMIO<i64>,
     ) -> Option<(usize, Option<i64>)> {
         let addresses = get_parameter_addresses_with_modes(memory, 2);
-        io.output.as_mut().map(|x| x(memory.get(addresses[0], 0)));
+        if let Some(function) = io.output.as_mut() {
+            function(memory.get(addresses[0], 0));
+        }
         Some((
             memory.instruction_pointer + 2,
             Some(memory.get(addresses[0], 0)),
@@ -179,7 +181,7 @@ impl OpCode<i64> for RelativeBaseOffset {
     ) -> Option<(usize, Option<i64>)> {
         let addresses = get_parameter_addresses_with_modes(memory, 1);
         let a = memory.get(addresses[0], 0);
-        if memory.metadata.len() < 1 {
+        if memory.metadata.is_empty() {
             memory.metadata.resize(1, 0)
         }
         memory.metadata[0] += a;
@@ -199,7 +201,7 @@ pub fn get_ops() -> HashMap<i64, Box<dyn OpCode<i64>>> {
     ops.insert(8, Box::new(Equals));
     ops.insert(9, Box::new(RelativeBaseOffset));
     ops.insert(99, Box::new(Halt));
-    return ops;
+    ops
 }
 
 fn string_to_i64_list(data: &str) -> Result<Vec<i64>, std::num::ParseIntError> {
@@ -258,7 +260,7 @@ mod test {
         let mut vm = load_from_file("../day-02/part-1/input.txt").unwrap();
         while let Some(_) = vm.next() {}
         let last_memory = vm.memory.memory;
-        assert_eq!(last_memory[0], 9581917);
+        assert_eq!(last_memory[0], 9_581_917);
     }
 
     #[test]
@@ -268,7 +270,7 @@ mod test {
         vm.memory[2] = 5;
         while let Some(_) = vm.next() {}
         let last_memory = vm.memory.memory;
-        assert_eq!(last_memory[0], 19690720);
+        assert_eq!(last_memory[0], 19_690_720);
     }
 
     // Day 5 part 1
@@ -296,7 +298,7 @@ mod test {
         }));
         vm.last().unwrap();
         assert_eq!(count, 10);
-        assert_eq!(last_value, 16434972);
+        assert_eq!(last_value, 16_434_972);
     }
 
     // Day 5 part 2
@@ -598,7 +600,7 @@ mod test {
         }));
         vm.last().unwrap();
         assert_eq!(count, 1);
-        assert_eq!(last_value, 16694270);
+        assert_eq!(last_value, 16_694_270);
     }
 
     // Quine: takes no input and produces a copy of itself as output.
@@ -627,6 +629,6 @@ mod test {
     #[test]
     fn test_day9_part1_large() {
         let vm = load_from_str("104,1125899906842624,99").unwrap();
-        assert_eq!(vm.collect::<Vec<i64>>(), vec!(1125899906842624));
+        assert_eq!(vm.collect::<Vec<i64>>(), vec!(1_125_899_906_842_624));
     }
 }
