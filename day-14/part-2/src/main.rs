@@ -350,28 +350,28 @@ mod test {
     fn run_example_equations() {
         let equation_set: EquationSet = EXAMPLE_EQUATIONS.parse().unwrap();
 
-        let example_1 = equation_set.create_chemical(ChemicalQuantity("A".to_string(), 10));
+        let example_1 = equation_set.create_chemical(ChemicalQuantity("A".to_string(), 10)).unwrap();
         assert_eq!(example_1.get(&"ORE".to_string()).unwrap().0, 45);
 
-        let example_2 = equation_set.create_chemical(ChemicalQuantity("B".to_string(), 24));
+        let example_2 = equation_set.create_chemical(ChemicalQuantity("B".to_string(), 24)).unwrap();
         assert_eq!(example_2.get(&"ORE".to_string()).unwrap().0, 64);
 
-        let example_3 = equation_set.create_chemical(ChemicalQuantity("C".to_string(), 40));
+        let example_3 = equation_set.create_chemical(ChemicalQuantity("C".to_string(), 40)).unwrap();
         assert_eq!(example_3.get(&"ORE".to_string()).unwrap().0, 56);
 
-        let example_4 = equation_set.create_chemical(ChemicalQuantity("AB".to_string(), 2));
+        let example_4 = equation_set.create_chemical(ChemicalQuantity("AB".to_string(), 2)).unwrap();
         assert_eq!(example_4.get(&"A".to_string()).unwrap().0, 6);
         assert_eq!(example_4.get(&"B".to_string()).unwrap().0, 8);
 
-        let example_5 = equation_set.create_chemical(ChemicalQuantity("BC".to_string(), 3));
+        let example_5 = equation_set.create_chemical(ChemicalQuantity("BC".to_string(), 3)).unwrap();
         assert_eq!(example_5.get(&"B".to_string()).unwrap().0, 15);
         assert_eq!(example_5.get(&"C".to_string()).unwrap().0, 21);
 
-        let example_6 = equation_set.create_chemical(ChemicalQuantity("CA".to_string(), 4));
+        let example_6 = equation_set.create_chemical(ChemicalQuantity("CA".to_string(), 4)).unwrap();
         assert_eq!(example_6.get(&"C".to_string()).unwrap().0, 16);
         assert_eq!(example_6.get(&"A".to_string()).unwrap().0, 4);
 
-        let example_7 = equation_set.create_chemical(ChemicalQuantity("FUEL".to_string(), 1));
+        let example_7 = equation_set.create_chemical(ChemicalQuantity("FUEL".to_string(), 1)).unwrap();
         assert_eq!(example_7.get(&"AB".to_string()).unwrap().0, 2);
         assert_eq!(example_7.get(&"BC".to_string()).unwrap().0, 3);
         assert_eq!(example_7.get(&"CA".to_string()).unwrap().0, 4);
