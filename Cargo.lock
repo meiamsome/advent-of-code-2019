@@ -117,6 +117,10 @@ name = "day-14-part-1"
 version = "0.1.0"
 
 [[package]]
+name = "day-14-part-2"
+version = "0.1.0"
+
+[[package]]
 name = "day-2-part-1"
 version = "0.1.0"
 dependencies = [
