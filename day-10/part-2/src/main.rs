@@ -67,9 +67,9 @@ impl FromStr for AsteroidField {
             })
             .collect::<Result<_, _>>()?;
         Ok(AsteroidField {
-            width: width,
-            height: height,
-            data: data,
+            width,
+            height,
+            data,
         })
     }
 }
@@ -113,14 +113,14 @@ impl AsteroidField {
         self.data
             .par_iter()
             .map(|coords| (coords, self.count_visible_from(*coords)))
-            .max_by_key(|(_, visible)| visible.clone())
+            .max_by_key(|(_, visible)| *visible)
     }
 
     fn vaporization_list(&self, coords: (i32, i32)) -> VaporizationList {
         VaporizationList {
             field: self.clone(),
             current_angle: 3f64 * std::f64::consts::FRAC_PI_2 - 0.0001f64,
-            coords: coords,
+            coords,
         }
     }
 }
@@ -137,8 +137,7 @@ impl Iterator for VaporizationList {
     type Item = (i32, i32);
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some((coords, angle, _)) = self
-            .field
+        self.field
             .get_visible_from(self.coords)
             .iter()
             .map(|asteroid_coords| {
@@ -157,15 +156,13 @@ impl Iterator for VaporizationList {
                 )
             })
             .min_by(|(_, _, d_angle_1), (_, _, d_angle_2)| {
-                (*d_angle_1).partial_cmp(d_angle_2).unwrap()
+                d_angle_1.partial_cmp(d_angle_2).unwrap()
             })
-        {
-            self.field.data.remove(&coords);
-            self.current_angle = angle;
-            Some(*coords)
-        } else {
-            None
-        }
+            .map(|(coords, angle, _)| {
+                self.field.data.remove(&coords);
+                self.current_angle = angle;
+                *coords
+            })
     }
 }
 
@@ -188,83 +185,83 @@ mod test {
     use super::AsteroidField;
     use super::AsteroidFieldParseError::*;
 
-    const SMALL_ASTEROID_FIELD: &'static str = "\
-                                                .#..#\n\
-                                                .....\n\
-                                                #####\n\
-                                                ....#\n\
-                                                ...##\n\
-                                                ";
+    const SMALL_ASTEROID_FIELD: &str = "\
+                                        .#..#\n\
+                                        .....\n\
+                                        #####\n\
+                                        ....#\n\
+                                        ...##\n\
+                                        ";
 
-    const MEDIUM_ASTEROID_1: &'static str = "\
-                                             ......#.#.\n\
-                                             #..#.#....\n\
-                                             ..#######.\n\
-                                             .#.#.###..\n\
-                                             .#..#.....\n\
-                                             ..#....#.#\n\
-                                             #..#....#.\n\
-                                             .##.#..###\n\
-                                             ##...#..#.\n\
-                                             .#....####\n\
-                                             ";
+    const MEDIUM_ASTEROID_1: &str = "\
+                                     ......#.#.\n\
+                                     #..#.#....\n\
+                                     ..#######.\n\
+                                     .#.#.###..\n\
+                                     .#..#.....\n\
+                                     ..#....#.#\n\
+                                     #..#....#.\n\
+                                     .##.#..###\n\
+                                     ##...#..#.\n\
+                                     .#....####\n\
+                                     ";
 
-    const MEDIUM_ASTEROID_2: &'static str = "\
-                                             #.#...#.#.\n\
-                                             .###....#.\n\
-                                             .#....#...\n\
-                                             ##.#.#.#.#\n\
-                                             ....#.#.#.\n\
-                                             .##..###.#\n\
-                                             ..#...##..\n\
-                                             ..##....##\n\
-                                             ......#...\n\
-                                             .####.###.\n\
-                                             ";
+    const MEDIUM_ASTEROID_2: &str = "\
+                                     #.#...#.#.\n\
+                                     .###....#.\n\
+                                     .#....#...\n\
+                                     ##.#.#.#.#\n\
+                                     ....#.#.#.\n\
+                                     .##..###.#\n\
+                                     ..#...##..\n\
+                                     ..##....##\n\
+                                     ......#...\n\
+                                     .####.###.\n\
+                                     ";
 
-    const MEDIUM_ASTEROID_3: &'static str = "\
-                                             .#..#..###\n\
-                                             ####.###.#\n\
-                                             ....###.#.\n\
-                                             ..###.##.#\n\
-                                             ##.##.#.#.\n\
-                                             ....###..#\n\
-                                             ..#.#..#.#\n\
-                                             #..#.#.###\n\
-                                             .##...##.#\n\
-                                             .....#.#..\n\
-                                             ";
+    const MEDIUM_ASTEROID_3: &str = "\
+                                     .#..#..###\n\
+                                     ####.###.#\n\
+                                     ....###.#.\n\
+                                     ..###.##.#\n\
+                                     ##.##.#.#.\n\
+                                     ....###..#\n\
+                                     ..#.#..#.#\n\
+                                     #..#.#.###\n\
+                                     .##...##.#\n\
+                                     .....#.#..\n\
+                                     ";
 
-    const BIG_ASTEROID_FIELD: &'static str = "\
-                                              .#..##.###...#######\n\
-                                              ##.############..##.\n\
-                                              .#.######.########.#\n\
-                                              .###.#######.####.#.\n\
-                                              #####.##.#.##.###.##\n\
-                                              ..#####..#.#########\n\
-                                              ####################\n\
-                                              #.####....###.#.#.##\n\
-                                              ##.#################\n\
-                                              #####.##.###..####..\n\
-                                              ..######..##.#######\n\
-                                              ####.##.####...##..#\n\
-                                              .#####..#.######.###\n\
-                                              ##...#.##########...\n\
-                                              #.##########.#######\n\
-                                              .####.#.###.###.#.##\n\
-                                              ....##.##.###..#####\n\
-                                              .#.#.###########.###\n\
-                                              #.#.#.#####.####.###\n\
-                                              ###.##.####.##.#..##\n\
-                                              ";
+    const BIG_ASTEROID_FIELD: &str = "\
+                                      .#..##.###...#######\n\
+                                      ##.############..##.\n\
+                                      .#.######.########.#\n\
+                                      .###.#######.####.#.\n\
+                                      #####.##.#.##.###.##\n\
+                                      ..#####..#.#########\n\
+                                      ####################\n\
+                                      #.####....###.#.#.##\n\
+                                      ##.#################\n\
+                                      #####.##.###..####..\n\
+                                      ..######..##.#######\n\
+                                      ####.##.####...##..#\n\
+                                      .#####..#.######.###\n\
+                                      ##...#.##########...\n\
+                                      #.##########.#######\n\
+                                      .####.#.###.###.#.##\n\
+                                      ....##.##.###..#####\n\
+                                      .#.#.###########.###\n\
+                                      #.#.#.#####.####.###\n\
+                                      ###.##.####.##.#..##\n\
+                                      ";
 
-    const VAPORIZATION_EXAMPLE: &'static str = "\
-                                                .#....#####...#..\n\
-                                                ##...##.#####..##\n\
-                                                ##...#...#.#####.\n\
-                                                ..#.....#...###..\n\
-                                                ..#.#.....#....##\n\
-                                                ";
+    const VAPORIZATION_EXAMPLE: &str = "\
+                                        .#....#####...#..\n\
+                                        ##...##.#####..##\n\
+                                        ##...#...#.#####.\n\
+                                        ..#.....#...###..\n\
+                                        ..#.#.....#....##\n\
+                                        ";
 
     // AsteroidField FromStr
     #[test]
@@ -461,7 +458,7 @@ mod test {
             .vaporization_list((11, 13))
             .collect::<Vec<_>>();
         assert_eq!(vaporization.len(), 299);
-        for (iter, coord) in vec![
+        for (iter, coord) in [
             (0, (11, 12)),
             (1, (12, 1)),
             (2, (12, 2)),
@@ -473,7 +470,10 @@ mod test {
             (199, (8, 2)),
             (200, (10, 9)),
             (298, (11, 1)),
-        ] {
+        ]
+        .iter()
+        .cloned()
+        {
             assert_eq!(vaporization[iter], coord);
         }
     }

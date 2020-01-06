@@ -67,9 +67,9 @@ impl FromStr for AsteroidField {
             })
             .collect::<Result<_, _>>()?;
         Ok(AsteroidField {
-            width: width,
-            height: height,
-            data: data,
+            width,
+            height,
+            data,
         })
     }
 }
@@ -109,7 +109,7 @@ impl AsteroidField {
         self.data
             .par_iter()
             .map(|coords| (coords, self.count_visible_from(*coords)))
-            .max_by_key(|(_, visible)| visible.clone())
+            .max_by_key(|(_, visible)| *visible)
     }
 }
 
@@ -129,7 +129,7 @@ mod test {
     use super::AsteroidField;
     use super::AsteroidFieldParseError::*;
 
-    const SMALL_ASTEROID_FIELD: &'static str = "\
+    const SMALL_ASTEROID_FIELD: &str = "\
                                                 .#..#\n\
                                                 .....\n\
                                                 #####\n\
@@ -137,7 +137,7 @@ mod test {
                                                 ...##\n\
                                                 ";
 
-    const MEDIUM_ASTEROID_1: &'static str = "\
+    const MEDIUM_ASTEROID_1: &str = "\
                                              ......#.#.\n\
                                              #..#.#....\n\
                                              ..#######.\n\
@@ -150,7 +150,7 @@ mod test {
                                              .#....####\n\
                                              ";
 
-    const MEDIUM_ASTEROID_2: &'static str = "\
+    const MEDIUM_ASTEROID_2: &str = "\
                                              #.#...#.#.\n\
                                              .###....#.\n\
                                              .#....#...\n\
@@ -163,7 +163,7 @@ mod test {
                                              .####.###.\n\
                                              ";
 
-    const MEDIUM_ASTEROID_3: &'static str = "\
+    const MEDIUM_ASTEROID_3: &str = "\
                                              .#..#..###\n\
                                              ####.###.#\n\
                                              ....###.#.\n\
@@ -176,7 +176,7 @@ mod test {
                                              .....#.#..\n\
                                              ";
 
-    const BIG_ASTEROID_FIELD: &'static str = "\
+    const BIG_ASTEROID_FIELD: &str = "\
                                               .#..##.###...#######\n\
                                               ##.############..##.\n\
                                               .#.######.########.#\n\

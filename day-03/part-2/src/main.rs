@@ -3,11 +3,13 @@ use std::io::prelude::*;
 
 use std::collections::{HashMap, HashSet};
 
+type Vector2 = (i32, i32);
+
 fn trace_step(
     step: i32,
-    from: (i32, i32),
+    from: Vector2,
     instruction: &str,
-) -> (i32, (i32, i32), HashMap<(i32, i32), i32>) {
+) -> (i32, Vector2, HashMap<Vector2, i32>) {
     let (direction, len_str) = instruction.split_at(1);
     let len = len_str.parse::<i32>().unwrap();
     let component = match direction {
@@ -29,7 +31,7 @@ fn trace_step(
     (current_step, pos, set)
 }
 
-fn trace_wire(instructions: &str) -> HashMap<(i32, i32), i32> {
+fn trace_wire(instructions: &str) -> HashMap<Vector2, i32> {
     let mut map = HashMap::new();
     let mut pos = (0, 0);
     let mut distance = 0;
@@ -42,13 +44,13 @@ fn trace_wire(instructions: &str) -> HashMap<(i32, i32), i32> {
             new_map
                 .into_iter()
                 .filter(|(key, _)| !map.contains_key(key))
-                .collect::<Vec<((i32, i32), i32)>>(),
+                .collect::<Vec<(Vector2, i32)>>(),
         );
     }
     map
 }
 
-fn find_intersections(instruction_sets: &str) -> HashMap<(i32, i32), i32> {
+fn find_intersections(instruction_sets: &str) -> HashMap<Vector2, i32> {
     let instructions: Vec<&str> = instruction_sets.split_whitespace().collect();
     if instructions.len() != 2 {
         panic!(
@@ -57,16 +59,16 @@ fn find_intersections(instruction_sets: &str) -> HashMap<(i32, i32), i32> {
         );
     }
     let map_a = trace_wire(instructions[0]);
-    let set_a: HashSet<&(i32, i32)> = map_a.keys().collect();
+    let set_a: HashSet<&Vector2> = map_a.keys().collect();
     let map_b = trace_wire(instructions[1]);
-    let set_b: HashSet<&(i32, i32)> = map_b.keys().collect();
+    let set_b: HashSet<&Vector2> = map_b.keys().collect();
     set_a
         .intersection(&set_b)
         .map(|&x| (*x, map_a.get(x).unwrap() + map_b.get(x).unwrap()))
         .collect()
 }
 
-fn smallest_intersection(instruction_sets: &str) -> Option<((i32, i32), i32)> {
+fn smallest_intersection(instruction_sets: &str) -> Option<(Vector2, i32)> {
     find_intersections(instruction_sets)
         .into_iter()
         .fold(None, |best, ((pos_x, pos_y), len)| {
@@ -75,7 +77,7 @@ fn smallest_intersection(instruction_sets: &str) -> Option<((i32, i32), i32)> {
                     return best;
                 }
             }
-            return Some(((pos_x, pos_y), len));
+            Some(((pos_x, pos_y), len))
         })
 }
 

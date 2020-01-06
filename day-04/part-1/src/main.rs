@@ -1,6 +1,6 @@
 fn main() {
-    let min = 357253;
-    let max = 892942;
+    let min = 357_253;
+    let max = 892_942;
     let mut count = 0;
 
     for dig1 in 3..=8 {

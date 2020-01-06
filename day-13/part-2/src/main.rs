@@ -1,6 +1,7 @@
 use std::io::{stdin, stdout, Write};
 use std::rc::Rc;
 use std::sync::Mutex;
+use std::cmp::Ordering;
 use termion::screen::AlternateScreen;
 use vm::lang::load_from_file;
 
@@ -36,12 +37,10 @@ impl Iterator for Input {
 
     fn next(&mut self) -> Option<i64> {
         let lock = self.positions.lock().unwrap();
-        Some(if (*lock).0 < (*lock).1 {
-            -1
-        } else if (*lock).0 > (*lock).1 {
-            1
-        } else {
-            0
+        Some(match (*lock).0.cmp(&(*lock).1) {
+            Ordering::Less => -1,
+            Ordering::Equal => 0,
+            Ordering::Greater => 1,
         })
     }
 }
@@ -73,51 +72,48 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         termion::clear::CurrentLine,
         termion::cursor::Hide
     )?;
-    loop {
-        if let Some(x) = vm.next() {
-            if let Some(y) = vm.next() {
-                if let Some(tile_id_or_score) = vm.next() {
-                    if x == -1 {
-                        write!(
-                            screen,
-                            "{}Score: {}{}",
-                            termion::cursor::Goto(1, 1),
-                            tile_id_or_score,
-                            termion::cursor::Hide
-                        )?;
-                    } else {
-                        let tile = tile_id_or_score.into();
-                        write!(
-                            screen,
-                            "{}{}{}",
-                            termion::cursor::Goto((x + 1) as u16, (y + 2) as u16),
-                            match tile {
-                                Tile::Empty => " ",
-                                Tile::Wall => "█",
-                                Tile::Block => "░",
-                                Tile::Paddle => "▔",
-                                Tile::Ball => "•",
-                            },
-                            termion::cursor::Hide
-                        )?;
-                        if tile == Tile::Paddle {
-                            input.set_paddle_pos(x)
-                        }
-                        if tile == Tile::Ball {
-                            input.set_ball_pos(x)
-                        }
-                    }
+    while let Some(x) = vm.next() {
+        if let Some(y) = vm.next() {
+            if let Some(tile_id_or_score) = vm.next() {
+                if x == -1 {
+                    write!(
+                        screen,
+                        "{}Score: {}{}",
+                        termion::cursor::Goto(1, 1),
+                        tile_id_or_score,
+                        termion::cursor::Hide
+                    )?;
                 } else {
-                    panic!()
+                    let tile = tile_id_or_score.into();
+                    write!(
+                        screen,
+                        "{}{}{}",
+                        termion::cursor::Goto((x + 1) as u16, (y + 2) as u16),
+                        match tile {
+                            Tile::Empty => " ",
+                            Tile::Wall => "█",
+                            Tile::Block => "░",
+                            Tile::Paddle => "▔",
+                            Tile::Ball => "•",
+                        },
+                        termion::cursor::Hide
+                    )?;
+                    if tile == Tile::Paddle {
+                        input.set_paddle_pos(x)
+                    }
+                    if tile == Tile::Ball {
+                        input.set_ball_pos(x)
+                    }
                 }
             } else {
                 panic!()
             }
         } else {
-            break;
+            panic!()
         }
         screen.flush()?;
     }
+    screen.flush()?;
     stdin().read_line(&mut String::new())?;
     Ok(())
 }

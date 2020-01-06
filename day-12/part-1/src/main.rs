@@ -1,4 +1,5 @@
 use std::iter::Sum;
+use std::cmp::Ordering;
 use std::ops::{Add, Sub};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -42,26 +43,20 @@ impl NBodySim {
 
 fn accelerate(pos: &Vector3, other_pos: &Vector3) -> Vector3 {
     Vector3(
-        if pos.0 < other_pos.0 {
-            1
-        } else if pos.0 > other_pos.0 {
-            -1
-        } else {
-            0
+        match pos.0.cmp(&other_pos.0) {
+            Ordering::Greater => -1,
+            Ordering::Less => 1,
+            Ordering::Equal => 0
         },
-        if pos.1 < other_pos.1 {
-            1
-        } else if pos.1 > other_pos.1 {
-            -1
-        } else {
-            0
+        match pos.1.cmp(&other_pos.1) {
+            Ordering::Greater => -1,
+            Ordering::Less => 1,
+            Ordering::Equal => 0
         },
-        if pos.2 < other_pos.2 {
-            1
-        } else if pos.2 > other_pos.2 {
-            -1
-        } else {
-            0
+        match pos.2.cmp(&other_pos.2) {
+            Ordering::Greater => -1,
+            Ordering::Less => 1,
+            Ordering::Equal => 0
         },
     )
 }

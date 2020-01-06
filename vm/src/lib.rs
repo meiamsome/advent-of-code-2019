@@ -80,14 +80,14 @@ where
         IntcodeVM {
             memory: IntcodeVMMemory {
                 instruction_pointer: 0,
-                memory: memory,
+                memory,
                 metadata: Vec::new(),
             },
-            op_codes: op_codes,
-            op_code_map: op_code_map,
+            op_codes,
+            op_code_map,
             io: IntcodeVMIO {
-                input: input,
-                output: output,
+                input,
+                output,
             },
         }
     }
