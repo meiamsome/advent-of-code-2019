@@ -45,7 +45,7 @@ impl FromStr for ChemicalQuantity {
     type Err = ChemicalQuantityParseError;
 
     fn from_str(s: &str) -> Result<ChemicalQuantity, Self::Err> {
-        let parts: Vec<&str> = s.trim().split(" ").collect();
+        let parts: Vec<&str> = s.trim().split(' ').collect();
         if parts.len() != 2 {
             return Err(ChemicalQuantityParseError::IncorrectParts(parts.len()));
         }
@@ -102,7 +102,7 @@ impl FromStr for Equation {
         let rhs = parts[1];
         let output = rhs.trim().parse()?;
         let inputs = lhs
-            .split(",")
+            .split(',')
             .map(|chem| chem.parse())
             .collect::<Result<Vec<_>, _>>()?;
         Ok(Equation { inputs, output })
@@ -120,7 +120,7 @@ impl FromStr for EquationSet {
     fn from_str(s: &str) -> Result<EquationSet, Self::Err> {
         let equations = s
             .trim()
-            .split("\n")
+            .split('\n')
             .map(|line| line.parse())
             .collect::<Result<Vec<Equation>, _>>()?
             .into_iter()
