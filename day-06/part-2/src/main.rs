@@ -34,9 +34,7 @@ fn get_shortest_path<'a>(ancestors: HashMap<&'a str, Vec<&'a str>>, from: &str, 
     from_list.extend(ancestors.get(from).expect("From not in map").iter());
     let mut to_list: HashSet<&str> = HashSet::new();
     to_list.extend(ancestors.get(to).expect("To not in map").iter());
-    from_list
-        .symmetric_difference(&to_list)
-        .count()
+    from_list.symmetric_difference(&to_list).count()
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

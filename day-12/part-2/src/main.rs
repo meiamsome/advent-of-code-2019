@@ -30,17 +30,17 @@ fn accelerate(pos: &Vector3, other_pos: &Vector3) -> Vector3 {
         match pos.0.cmp(&other_pos.0) {
             Ordering::Greater => -1,
             Ordering::Less => 1,
-            Ordering::Equal => 0
+            Ordering::Equal => 0,
         },
         match pos.1.cmp(&other_pos.1) {
             Ordering::Greater => -1,
             Ordering::Less => 1,
-            Ordering::Equal => 0
+            Ordering::Equal => 0,
         },
         match pos.2.cmp(&other_pos.2) {
             Ordering::Greater => -1,
             Ordering::Less => 1,
-            Ordering::Equal => 0
+            Ordering::Equal => 0,
         },
     )
 }

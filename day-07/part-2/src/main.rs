@@ -69,9 +69,7 @@ fn run_with_phases(program: &str, phases: Vec<i64>) -> StandardError<i64> {
     Ok(result)
 }
 
-fn get_optimal_phase(
-    program: &str,
-) -> StandardError<(i64, Phase)> {
+fn get_optimal_phase(program: &str) -> StandardError<(i64, Phase)> {
     let mut max = 0;
     let mut arg_max = (0, 0, 0, 0, 0);
     for a in 5..=9 {

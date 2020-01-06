@@ -85,10 +85,7 @@ where
             },
             op_codes,
             op_code_map,
-            io: IntcodeVMIO {
-                input,
-                output,
-            },
+            io: IntcodeVMIO { input, output },
         }
     }
 }

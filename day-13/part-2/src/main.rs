@@ -1,7 +1,7 @@
+use std::cmp::Ordering;
 use std::io::{stdin, stdout, Write};
 use std::rc::Rc;
 use std::sync::Mutex;
-use std::cmp::Ordering;
 use termion::screen::AlternateScreen;
 use vm::lang::load_from_file;
 
