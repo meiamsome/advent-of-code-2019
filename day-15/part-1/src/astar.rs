@@ -11,9 +11,10 @@ fn dist(a: Position, b: Position) -> i64 {
 }
 
 pub struct AStar {
-    open_set: HashMap<Position, (i64, Option<Position>)>,
-    closed_set: HashMap<Position, (i64, Option<Position>)>,
-    maze: Maze,
+    pub dist_fn: &'static dyn (Fn(Position, Position) -> i64),
+    pub open_set: HashMap<Position, (i64, Option<Position>)>,
+    pub closed_set: HashMap<Position, (i64, Option<Position>)>,
+    pub maze: Maze,
     pub target: Position,
 }
 
@@ -40,7 +41,7 @@ impl Iterator for AStar {
         if let Some((&pos, _)) = self
             .open_set
             .iter()
-            .map(|(pos, (path_len, _))| (pos, path_len + dist(*pos, self.target)))
+            .map(|(pos, (path_len, _))| (pos, path_len + (self.dist_fn)(*pos, self.target)))
             .min_by_key(|(_, score)| *score)
         {
             let (path_len, last) = self.open_set.remove(&pos).unwrap();
@@ -88,6 +89,7 @@ impl From<Maze> for AStar {
             .next()
             .unwrap();
         AStar {
+            dist_fn: &dist,
             open_set: vec![(other.start, (0, None))].into_iter().collect(),
             closed_set: HashMap::new(),
             maze: other,

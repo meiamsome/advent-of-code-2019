@@ -1,5 +1,5 @@
 [package]
-name = "day15part1"
+name = "day-15-part-2"
 version = "0.1.0"
 authors = ["Oliver Wright <meiamsome@meiamso.me>"]
 edition = "2018"
@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 vm = { path = "../../vm" }
 termion = "1.5.4"
+day15part1 = { path = "../part-1" }
