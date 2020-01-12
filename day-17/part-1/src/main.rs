@@ -32,7 +32,7 @@ impl Into<&str> for &Tile {
 }
 
 struct Map {
-    grid: Vec<Vec<Tile>>
+    grid: Vec<Vec<Tile>>,
 }
 
 impl Map {
@@ -65,28 +65,24 @@ impl Map {
 impl From<&str> for Map {
     fn from(other: &str) -> Map {
         Map {
-            grid: other.trim()
+            grid: other
+                .trim()
                 .split('\n')
-                .map(|line| {
-                    line.chars()
-                        .map(|x| x.into())
-                        .collect()
-                })
-                .collect()
+                .map(|line| line.chars().map(|x| x.into()).collect())
+                .collect(),
         }
     }
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let vm = load_from_file("./input.txt")?;
-    let map: Map = vm.map(|x| (x as u8) as char).collect::<String>().as_str().into();
+    let map: Map = vm
+        .map(|x| (x as u8) as char)
+        .collect::<String>()
+        .as_str()
+        .into();
     println!("{:?}", map.alignment_parameters());
-    println!(
-        "{:?}",
-        map.alignment_parameters()
-            .iter()
-            .sum::<i64>()
-    );
+    println!("{:?}", map.alignment_parameters().iter().sum::<i64>());
     Ok(())
 }
 
@@ -97,7 +93,8 @@ mod test {
     #[test]
     fn example_alignment_parameters() {
         assert_eq!(
-            Map::from("
+            Map::from(
+                "
 ..#..........
 ..#..........
 #######...###
@@ -105,7 +102,9 @@ mod test {
 #############
 ..#...#...#..
 ..#####...^..
-            ").alignment_parameters(),
+            "
+            )
+            .alignment_parameters(),
             vec![4, 8, 24, 40]
         )
     }
