@@ -146,7 +146,7 @@ mod test {
     use std::convert::TryInto;
 
     #[test]
-    fn test_get_range() {
+    fn test_get_range_0offset_1multiple() {
         assert_eq!(get_range(0, 0, 1), 0..0);
         assert_eq!(get_range(1, 0, 1), 0..1);
         assert_eq!(get_range(2, 0, 1), 1..3);
@@ -156,7 +156,10 @@ mod test {
         assert_eq!(get_range(6, 0, 1), 5..11);
         assert_eq!(get_range(7, 0, 1), 6..13);
         assert_eq!(get_range(8, 0, 1), 7..15);
+    }
 
+    #[test]
+    fn test_get_range_1offset_1multiple() {
         assert_eq!(get_range(0, 1, 1), 0..0);
         assert_eq!(get_range(1, 1, 1), 0..2);
         assert_eq!(get_range(2, 1, 1), 1..4);
@@ -166,7 +169,10 @@ mod test {
         assert_eq!(get_range(6, 1, 1), 5..12);
         assert_eq!(get_range(7, 1, 1), 6..14);
         assert_eq!(get_range(8, 1, 1), 7..16);
+    }
 
+    #[test]
+    fn test_get_range_0offset_3multiple() {
         assert_eq!(get_range(0, 0, 3), 0..0);
         assert_eq!(get_range(1, 0, 3), 2..3);
         assert_eq!(get_range(2, 0, 3), 5..7);
@@ -176,6 +182,10 @@ mod test {
         assert_eq!(get_range(6, 0, 3), 17..23);
         assert_eq!(get_range(7, 0, 3), 20..27);
         assert_eq!(get_range(8, 0, 3), 23..31);
+    }
+
+    #[test]
+    fn test_get_range_1offset_3multiple() {
         assert_eq!(get_range(0, 1, 3), 1..2);
         assert_eq!(get_range(1, 1, 3), 4..6);
         assert_eq!(get_range(2, 1, 3), 7..10);
@@ -185,6 +195,7 @@ mod test {
         assert_eq!(get_range(6, 1, 3), 19..26);
         assert_eq!(get_range(7, 1, 3), 22..30);
     }
+
     #[test]
     fn fft_step_12345678() {
         assert_eq!(
