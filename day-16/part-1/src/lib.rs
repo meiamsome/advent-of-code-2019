@@ -1,4 +1,4 @@
-use std::convert::{TryFrom};
+use std::convert::TryFrom;
 
 const BASE_PATTERN: &[i64] = &[0, 1, 0, -1];
 
@@ -59,8 +59,8 @@ impl Iterator for FFTPhases {
 
 #[cfg(test)]
 mod test {
-    use std::convert::TryInto;
     use super::*;
+    use std::convert::TryInto;
 
     #[test]
     fn fft_step_12345678() {
