@@ -51,9 +51,9 @@ mod test {
         let example = "03036732577212944063491565474664";
         let mut fft = proper_fft(example);
 
-        assert_eq!(fft.current.len(), (example.len() * 10000) - 303673);
+        assert_eq!(fft.current.len(), (example.len() * 10000) - 303_673);
 
-        assert_eq!(fft.offset, 303673);
+        assert_eq!(fft.offset, 303_673);
 
         assert_eq!(
             fft.nth(99).unwrap().into_iter().take(8).collect::<Vec<_>>(),
@@ -66,9 +66,9 @@ mod test {
         let example = "02935109699940807407585447034323";
         let mut fft = proper_fft(example);
 
-        assert_eq!(fft.current.len(), (example.len() * 10000) - 293510);
+        assert_eq!(fft.current.len(), (example.len() * 10000) - 293_510);
 
-        assert_eq!(fft.offset, 293510);
+        assert_eq!(fft.offset, 293_510);
 
         assert_eq!(
             fft.nth(99).unwrap().into_iter().take(8).collect::<Vec<_>>(),
@@ -81,9 +81,9 @@ mod test {
         let example = "03081770884921959731165446850517";
         let mut fft = proper_fft(example);
 
-        assert_eq!(fft.current.len(), (example.len() * 10000) - 308177);
+        assert_eq!(fft.current.len(), (example.len() * 10000) - 308_177);
 
-        assert_eq!(fft.offset, 308177);
+        assert_eq!(fft.offset, 308_177);
 
         assert_eq!(
             fft.nth(99).unwrap().into_iter().take(8).collect::<Vec<_>>(),
